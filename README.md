@@ -37,6 +37,39 @@ Cada hallazgo se explica en cuatro partes: **Medido · Problema · Lo ideal · S
 | Quien duerme mal por ruido | Medir el fondo del dormitorio y ver qué sellar |
 | Instalador o técnico | Tener una primera lectura rápida antes de una medición formal |
 
+## Guía para principiantes (sin saber nada de acústica)
+
+**Conceptos en palabras simples**
+
+| Palabra | Qué significa |
+|---|---|
+| **Ruido de fondo** | El sonido que hay cuando "no hay nada": aire acondicionado, tráfico, zumbidos. Se mide en decibelios (dB). |
+| **Eco / reverberación** | Cuánto tarda en apagarse un sonido en el cuarto. Cuarto vacío con paredes duras = mucho eco. |
+| **Claridad (C50, D50)** | Qué tan fácil se entiende una voz. Más alto = se entiende mejor. |
+| **Calibrar** | Enseñarle a la app cuántos decibelios reales mide tu micrófono, comparando con un sonómetro. |
+| **Absorción** | Materiales blandos (cortinas, alfombras, paneles) que "se tragan" el sonido y reducen el eco. |
+
+**Tu primera medición en 5 minutos**
+
+1. Abre la app en tu teléfono o computadora. Cuando pida permiso para el micrófono, pulsa *Permitir*.
+2. Entra al cuarto que quieres revisar, cierra la puerta y ponte donde normalmente te sientas o hablas.
+3. Elige para qué usas el cuarto (por ejemplo "Oficina" o "Estudio de grabación").
+4. Pulsa *Empezar medición automática*. Quédate en silencio unos 15 segundos. Cuando la app lo indique, **da un aplauso fuerte**.
+5. Lee el veredicto y el plan. Empieza por el primer paso: normalmente es lo más barato y lo que más ayuda.
+6. Aplica el cambio, vuelve a medir y compara.
+
+**Lo que debes saber antes de confiar en los números**
+- Los **tiempos de eco y la claridad** son confiables aunque no calibres.
+- Los **decibelios** son una estimación hasta que calibres tu micrófono.
+- Si el aplauso sale débil o hay ruido, la app te lo indica: repite la medición.
+
+**Preguntas frecuentes**
+
+- *¿Necesito un micrófono especial?* No. Funciona con el del teléfono. Uno externo USB-C puede dar mejores resultados.
+- *¿Se graba o se sube mi audio?* No. Todo se procesa en tu dispositivo.
+- *¿Sustituye a un especialista?* No. Es una primera guía, no una medición certificada.
+- *No me deja usar el micrófono.* Revisa los permisos del navegador. El micrófono solo funciona en páginas con `https`.
+
 ## ¿Qué problemas resuelve?
 
 | Problema que notas | Lo que mide la app | Lo que te sugiere |
@@ -123,6 +156,10 @@ Cada micrófono se calibra por separado y la calibración vale mientras no cambi
 ## Privacidad
 
 Todo el análisis ocurre en tu dispositivo. El audio **no se envía a ningún servidor**. La página solo descarga las tipografías desde Google Fonts.
+
+## ¿Quieres modificarla o proponer cambios?
+
+El código se publica para que lo puedas consultar, pero **solo el responsable puede modificarlo** (ver [LICENSE](LICENSE)). Si tienes una idea o quieres colaborar, [abre una propuesta](../../issues/new/choose) o escríbeme. Si me convence, te doy acceso para que trabajes en el código. Detalles en [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## ¿Te gusta la app? ¿Tienes sugerencias?
 
