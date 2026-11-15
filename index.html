@@ -1006,11 +1006,7 @@ const PRO_PRICE="149 MXN",PRO_MAIL="drophlex@gmail.com";
 const PRO_PUB={"kty":"EC","x":"OnwS8AF8UKnaVfpbubCXiVKIjeqO50CjSzIRWr1MMoQ","y":"3l3graVSf5EGRmV674vhSyC6k5IqHOOzwFIn0a8kOko","crv":"P-256"};
 const PRO={lic:null,sel:[],msg:""};
 const b64u=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
-const PRO_MASTER="e027c8abe10a2740f19bd5fe1e8dadd3c234a517476d0606d013cdf0516010ce";
 async function proVerify(code){
-  try{const c0=String(code||"").trim();
-    const hx=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(c0)))).map(b=>b.toString(16).padStart(2,"0")).join("");
-    if(hx===PRO_MASTER)return{p:"pro",n:"Código Polaris Sound Lab",d:new Date().toISOString().slice(0,10)}}catch(e){return null}
   try{const p=String(code||"").trim().split(".");if(p.length!==2)return null;
     const data=b64u(p[0]),sig=b64u(p[1]);if(sig.length!==64)return null;
     const key=await crypto.subtle.importKey("jwk",PRO_PUB,{name:"ECDSA",namedCurve:"P-256"},false,["verify"]);
