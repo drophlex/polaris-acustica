@@ -87,8 +87,6 @@ Medir es **siempre gratis y sin límite**. Tu **primera medición real incluye t
 
 **Cómo se obtiene Pro:** paga 149 MXN por PayPal desde la propia app, escríbeme y te envío tu código personal (lo entrego a mano, normalmente el mismo día). El código se pega en la app y funciona en cualquier dispositivo.
 
-**Transparencia:** el código se comprueba dentro de la app, sin servidor, así que técnicamente podría saltarse editando el código. Es una forma de apoyar el proyecto. La prueba de 24 horas se guarda en tu dispositivo.
-
 **¿Quieres que revise tu espacio?** Desde la app puedes enviarme tu informe por correo y platicamos qué conviene hacer. Es una orientación, no una medición profesional.
 
 ## ¿Qué problemas resuelve?
