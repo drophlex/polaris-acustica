@@ -70,6 +70,27 @@ Cada hallazgo se explica en cuatro partes: **Medido · Problema · Lo ideal · S
 - *¿Sustituye a un especialista?* No. Es una primera guía, no una medición certificada.
 - *No me deja usar el micrófono.* Revisa los permisos del navegador. El micrófono solo funciona en páginas con `https`.
 
+## Gratis y Pro
+
+Medir es **siempre gratis y sin límite**. Tu **primera medición real incluye todo Pro durante 24 horas** para que pruebes la herramienta completa. Después, la app sigue funcionando, con estas diferencias:
+
+| | Gratis | Pro (149 MXN, pago único) |
+|---|---|---|
+| Medir ruido, eco, claridad y aislamiento | ✅ | ✅ |
+| Veredicto y puntuación | ✅ | ✅ |
+| Plan de mejora | Los 3 primeros pasos | Completo |
+| Lista de compras | Los 3 primeros artículos | Completa |
+| Escucha la diferencia y modo Ingeniero | ✅ | ✅ |
+| Copiar informe y exportar CSV | ✅ (informe con 3 pasos) | ✅ completo |
+| Proyectos guardados y comparación de dos espacios | — | ✅ |
+| Informe en PDF con tu nombre o empresa y el logo | — | ✅ |
+
+**Cómo se obtiene Pro:** paga 149 MXN por PayPal desde la propia app, escríbeme y te envío tu código personal (lo entrego a mano, normalmente el mismo día). El código se pega en la app y funciona en cualquier dispositivo.
+
+**Transparencia:** el código se comprueba dentro de la app, sin servidor, así que técnicamente podría saltarse editando el código. Es una forma de apoyar el proyecto. La prueba de 24 horas se guarda en tu dispositivo.
+
+**¿Quieres que revise tu espacio?** Desde la app puedes enviarme tu informe por correo y platicamos qué conviene hacer. Es una orientación, no una medición profesional.
+
 ## ¿Qué problemas resuelve?
 
 | Problema que notas | Lo que mide la app | Lo que te sugiere |
@@ -140,9 +161,10 @@ Cada micrófono se calibra por separado y la calibración vale mientras no cambi
 - Ruido: LAeq, LZeq, LA10/50/90, máximos y mínimos, espectro en tercios de octava y curva NC.
 - Eco por bandas (EDT, T20, T30), claridad C50, detección de eco repetitivo y medición con barrido.
 - Aislamiento entre dos cuartos.
-- Plan por impacto y costo, con explicación en cada paso y lista de compras.
+- Plan por impacto y costo, con explicación en cada paso y lista de compras (completos en Pro).
 - Comparación antes y después, y escucha de la diferencia.
 - Informe para copiar y exportación CSV.
+- **Pro:** proyectos guardados, comparación de espacios e informe en PDF con tu marca.
 - Funciona sin internet después de la primera vez. Modo claro y oscuro.
 
 ## Precisión y límites

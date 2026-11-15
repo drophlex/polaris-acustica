@@ -57,6 +57,7 @@ button{cursor:pointer}
 .fbk p{margin:6px auto 0;max-width:520px;color:var(--mute)}
 .fbk .btns{justify-content:center;margin-top:12px}
 .fbk a.btn{text-decoration:none;display:inline-block;color:var(--ink)}
+.probar{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;font-size:13.5px;line-height:1.5;margin-bottom:12px;color:var(--ink)}.probar.on{border-color:var(--accent);background:var(--accent-soft)}.probar a,.lockn a{color:var(--accent);font-weight:600}.lockn{border:1px dashed var(--accent);background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-top:10px;font-size:13.5px;line-height:1.5}.lockn b{display:block}.pro h3{font:600 14px var(--body);margin:16px 0 6px}.proli{margin:8px 0 10px 18px;padding:0;line-height:1.6}.pro .row{display:flex;gap:10px;flex-wrap:wrap}.pro .row label{flex:1 1 200px;font-size:13px;display:flex;flex-direction:column;gap:4px;color:var(--mute)}.pro input[type=text]{flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:14px var(--body)}.pro .proact{margin-top:12px}.pro .proact summary{cursor:pointer;color:var(--accent);font-weight:600}.pro .lnk{background:none;border:0;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit;padding:0}.projs{list-style:none;margin:0;padding:0}.projs li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.pk{display:flex;gap:10px;align-items:flex-start;min-width:0}.pk small{display:block;color:var(--mute);font-size:12px}.cmp{overflow-x:auto;margin-top:10px}.cmp table{border-collapse:collapse;width:100%;font-size:13px}.cmp th,.cmp td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}.cmp th small{display:block;font-weight:400;color:var(--mute)}.pro .rev{margin-top:18px;border-top:1px solid var(--line);padding-top:4px}
 .fbk a.btn.pri{color:var(--accent-ink)}
 .fbk .mail{font-family:var(--mono);font-size:13px;color:var(--ink);user-select:all}
 .card h3{font-size:15px;margin:0 0 6px}
@@ -210,6 +211,7 @@ body[data-mode="eng"] .simp{display:none}
  </header>
 
  <div class="grid">
+  <div id="proBar" hidden></div>
   <section id="sum" class="card" aria-live="polite"></section>
 
   <section id="meas" class="card" aria-label="Medir">
@@ -284,6 +286,7 @@ body[data-mode="eng"] .simp{display:none}
   <section id="shop" class="card shop" hidden></section>
   <section id="det" class="card eng"></section>
  </div>
+ <section class="card pro" id="pro"></section>
  <section class="card fbk" id="fbk">
   <h2>¿Te gusta la app?</h2>
   <p>¿Tienes sugerencias o algo no funcionó como esperabas? Cuéntamelo: las leo todas.</p>
@@ -677,7 +680,7 @@ let CURV=null;
 function drawAll(ev){if(S.mode!=="eng")return;ev=ev||CURV;if(!ev)return;drawSpec(ev);drawTime();drawRt(ev);drawDec()}
 
 /* ============ informe y exportación ============ */
-function reportText(){const ev=evaluate(),u=ev.u,L=[`POLARIS ACÚSTICA · ${u.n}`];
+function reportText(full){const ev=evaluate(),u=ev.u,L=[`POLARIS ACÚSTICA · ${u.n}`];
   if(Vol())L.push(`Recinto: ${S.dims.l} × ${S.dims.w} × ${S.dims.h} m (${f1(Vol())} m³)`);
   if(ev.score!==undefined)L.push(`Puntuación: ${ev.score}/100`);
   if(ev.L!==undefined){L.push(`Ruido LAeq: ${f1(ev.L)} dB(A) (objetivo ≤ ${u.noise[0]})${S.noise.example?" [ejemplo]":""}`);L.push(`NC: ${ncRating(S.noise.oct,calOf(S.noise))} (objetivo NC-${u.nc})`)}
@@ -685,7 +688,7 @@ function reportText(){const ev=evaluate(),u=ev.u,L=[`POLARIS ACÚSTICA · ${u.n}
   {const ci=calInfo();L.push("");if(ci.kind==="no")L.push(`AVISO: decibelios sin calibrar (±5 a ±10 dB). Micrófono: ${ci.dev}. Dependen de la calibración: ruido dB(A), NC y la parte de ruido de la puntuación. No dependen: tiempos de eco, C50/D50, modos.`);else if(ci.kind==="ok")L.push(`Micrófono calibrado: ${ci.dev}${ci.c.man?" (ajuste manual)":" (con sonómetro)"}.`)}
   {const I=isoCalc(S.iso);if(I)L.push(`Aislamiento (500 Hz-2 kHz): ${I.lim?"≥ ":""}${f1(I.D)} dB (objetivo ≥ ${ISO_T[S.use]})`)}
   if(ev.R&&ev.R.flutter)L.push(`Posible eco repetitivo cada ${Math.round(ev.R.flutter.lag)} ms`);
-  L.push("","Plan (problema · ideal · solución):");buildRecs(ev).forEach((r,i)=>{L.push(`${i+1}. ${r.t}`);if(r.p){L.push(`   Problema: ${r.p}`,`   Ideal: ${r.ideal}`,`   Solución: ${r.sol}`)}});
+  {const all=buildRecs(ev),lim=!full&&!proOn()&&all.length>FREE_STEPS;L.push("","Plan (problema · ideal · solución):");(lim?all.slice(0,FREE_STEPS):all).forEach((r,i)=>{L.push(`${i+1}. ${r.t}`);if(r.p){L.push(`   Problema: ${r.p}`,`   Ideal: ${r.ideal}`,`   Solución: ${r.sol}`)}});if(lim)L.push(`(+${all.length-FREE_STEPS} pasos más en la versión Pro)`)}
   L.push("","Medición orientativa: no sustituye una medición profesional hecha con equipo certificado.","Polaris Sound Lab · Mérida, Yucatán, México · @polaris.sound.lab");return L.join("\n")}
 async function copyReport(){const m=$("#exMsg"),t=reportText();try{await navigator.clipboard.writeText(t);m.textContent="Informe copiado."}catch(e){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();m.textContent=ok?"Informe copiado.":"No se pudo copiar automáticamente."}}
 function csvText(){const rows=[["tipo","banda_hz","valor","unidad"]],ev=evaluate();
@@ -978,7 +981,7 @@ function renderLis(ev){
   $("#lisFile").onchange=e=>{lisFile(e.target.files[0]);e.target.value=""}}
 
 /* ============ conexión ============ */
-function update(){const ev=evaluate();CURV=ev;renderSum(ev);renderRecs(ev);renderLis(ev);renderShop(ev);renderDet(ev);renderCal();renderIso();$("#rTakes").hidden=!S.takes.length||S.tex;restoreInfo();drawAll(ev)}
+function update(){const ev=evaluate();CURV=ev;renderSum(ev);renderRecs(ev);renderLis(ev);renderShop(ev);renderDet(ev);renderCal();renderIso();$("#rTakes").hidden=!S.takes.length||S.tex;restoreInfo();drawAll(ev);if(window.proRender){proRender();proLimits()}}
 function paintUses(){$("#uses").innerHTML=Object.entries(USES).map(([k,u])=>`<button type="button" data-u="${k}" aria-pressed="${k===S.use}">${esc(u.n)}</button>`).join("");
   $("#uses").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.use=b.dataset.u;savePrefs();paintUses();update()})}
 function setMode(m){S.mode=m;document.body.dataset.mode=m;$("#mSimple").setAttribute("aria-pressed",m==="simple");$("#mEng").setAttribute("aria-pressed",m==="eng");savePrefs();if(m==="eng")requestAnimationFrame(()=>drawAll())}
@@ -998,10 +1001,154 @@ $("#nFile").onchange=e=>{fileNoise(e.target.files[0]);e.target.value=""};$("#rFi
 $("#rClear").onclick=()=>{S.takes=[];S.tex=false;$("#rMsg").textContent="Tomas borradas.";update()};
 let rz=0;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>drawAll(),150)});
 try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>drawAll());new MutationObserver(()=>drawAll()).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]})}catch(e){}
+/* ============ Versión Pro ============ */
+const PRO_PRICE="149 MXN",PRO_MAIL="drophlex@gmail.com";
+const PRO_PUB={"kty":"EC","x":"OnwS8AF8UKnaVfpbubCXiVKIjeqO50CjSzIRWr1MMoQ","y":"3l3graVSf5EGRmV674vhSyC6k5IqHOOzwFIn0a8kOko","crv":"P-256"};
+const PRO={lic:null,sel:[],msg:""};
+const b64u=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+async function proVerify(code){
+  try{const p=String(code||"").trim().split(".");if(p.length!==2)return null;
+    const data=b64u(p[0]),sig=b64u(p[1]);if(sig.length!==64)return null;
+    const key=await crypto.subtle.importKey("jwk",PRO_PUB,{name:"ECDSA",namedCurve:"P-256"},false,["verify"]);
+    if(!await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"},key,sig,data))return null;
+    const o=JSON.parse(new TextDecoder().decode(data));return o.p==="pro"?o:null}catch(e){return null}}
+const TRIAL_MS=24*3600*1000,FREE_STEPS=3;
+const trialRec=()=>ld("psl_trial");
+const trialLeft=()=>{const t=trialRec();return t&&t.ts?t.ts+TRIAL_MS-Date.now():0};
+const trialActive=()=>!PRO.lic&&trialLeft()>0;
+const trialUsed=()=>!!trialRec();
+const proOn=()=>!!PRO.lic||trialActive()||!trialUsed();
+const realMeas=()=>!!((S.noise&&!S.nex)||(S.takes.length&&!S.tex));
+function trialLabel(){const m=Math.max(0,trialLeft()),h=Math.floor(m/3600000),mi=Math.floor(m%3600000/60000);return h>0?h+" h "+mi+" min":mi+" min"}
+function proTrialCheck(){if(!PRO.lic&&!trialUsed()&&realMeas()){sv("psl_trial",{ts:Date.now()})}}
+const projs=()=>ld("psl_proj")||[];
+const brand=()=>ld("psl_brand")||{biz:"",cli:""};
+function proSummary(){const ev=evaluate(),R=ev.R,ci=calInfo();
+  return{id:Date.now().toString(36),ts:Date.now(),name:"",use:S.use,useN:ev.u.n,vol:Vol()||0,
+    score:ev.score!==undefined?ev.score:null,laeq:ev.L!==undefined?Math.round(ev.L*10)/10:null,
+    T:ev.T!==undefined?Math.round(ev.T*100)/100:null,c50:R&&R.c50!=null?Math.round(R.c50*10)/10:null,
+    bands:R?RTB.map(f=>{const b=R.bands[f];return[f,b&&b.t?Math.round(b.t*100)/100:null]}):[],
+    iso:(()=>{const I=isoCalc(S.iso);return I?Math.round(I.D*10)/10:null})(),
+    cal:ci.kind,dev:ci.dev||"",ex:!!(S.nex||S.tex),recs:buildRecs(ev).slice(0,8).map(r=>r.t)}}
+function fdt(ts){try{return new Date(ts).toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"numeric"})}catch(e){return""}}
+function proBar(){const b=$("#proBar");if(!b)return;
+  if(PRO.lic){b.innerHTML="";b.hidden=true;return}b.hidden=false;
+  if(trialActive())b.innerHTML=`<div class="probar on"><b>Prueba Pro completa activa</b> · te quedan ${trialLabel()}. Incluye plan completo, lista de compras completa, proyectos guardados, comparación e informe PDF. <a href="#pro">Ver Pro</a></div>`;
+  else if(trialUsed())b.innerHTML=`<div class="probar"><b>Tu prueba Pro terminó.</b> Puedes seguir midiendo gratis: ves el veredicto y los primeros ${FREE_STEPS} pasos del plan. El plan completo, el PDF y los proyectos son de la versión Pro (${PRO_PRICE}). <a href="#pro">Ver Pro</a></div>`;
+  else b.innerHTML=`<div class="probar"><b>Tu primera medición incluye Pro completa durante 24 horas.</b> Después seguirás midiendo gratis, con el plan limitado a ${FREE_STEPS} pasos y sin PDF ni proyectos guardados.</div>`}
+function proLimits(){if(proOn())return;
+  const rs=$("#recs");if(rs){const L=[...rs.querySelectorAll(".rec")];if(L.length>FREE_STEPS){L.slice(FREE_STEPS).forEach(x=>x.remove());rs.insertAdjacentHTML("beforeend",`<div class="lockn"><b>+${L.length-FREE_STEPS} pasos más en Pro</b><span>Con la versión Pro ves el plan completo, con qué hacer, en qué orden y con qué materiales. <a href="#pro">Ver Pro (${PRO_PRICE})</a></span></div>`)}}
+  const sh=$("#shop");if(sh&&!sh.hidden){const L=[...sh.querySelectorAll("li")];if(L.length>FREE_STEPS){L.slice(FREE_STEPS).forEach(x=>x.remove());const u=sh.querySelector("ul");if(u)u.insertAdjacentHTML("afterend",`<div class="lockn"><b>+${L.length-FREE_STEPS} artículos más en Pro</b><span>La lista completa de compras está en la versión Pro. <a href="#pro">Ver Pro</a></span></div>`)}}}
+function proRender(){const el=$("#pro");if(!el)return;proTrialCheck();proBar();const on=proOn(),ps=projs(),br=brand();let h="";
+  h+=`<h2>Polaris Acústica Pro <span class="tag">${PRO.lic?"Activa":trialActive()?"Prueba · "+trialLabel():PRO_PRICE}</span></h2>`;
+  if(trialActive())h+=`<p class="note"><b>Tu primera medición incluye Pro completa.</b> Tienes todo desbloqueado durante ${trialLabel()}. Lo que guardes en este tiempo se conserva; después, para volver a generar PDF, guardar o comparar proyectos, necesitas la licencia (${PRO_PRICE}).</p>`;
+  else if(trialUsed()&&!PRO.lic)h+=`<p class="note"><b>Tu prueba Pro terminó.</b> Para seguir usando el plan completo, el PDF y los proyectos, activa la licencia.</p>`;
+  if(!PRO.lic){
+    h+=`<p>Medir, ver el veredicto, los primeros ${FREE_STEPS} pasos del plan, escuchar la diferencia y copiar el informe son <b>gratis</b>. La versión Pro agrega:</p>
+    <ul class="proli"><li><b>Plan completo</b> y <b>lista de compras completa</b>.</li><li><b>Proyectos guardados</b> en este dispositivo.</li><li><b>Comparación</b> de dos espacios o de antes y después.</li><li><b>Informe en PDF</b> con tu nombre o empresa y el logo de Polaris Sound Lab.</li></ul>
+    <p class="note">Pago único de ${PRO_PRICE}. Tras pagar por PayPal, escríbeme y te envío tu código personal (lo entrego a mano, normalmente el mismo día). El código funciona en cualquier dispositivo.</p>
+    <div class="btns"><a class="btn pri" id="proPay" href="https://www.paypal.com/donate?business=drophlex%40gmail.com&amp;amount=149&amp;currency_code=MXN&amp;item_name=Polaris%20Ac%C3%BAstica%20Pro" target="_blank" rel="noopener">Pagar ${PRO_PRICE} (PayPal)</a><a class="btn" id="proMail" href="mailto:${PRO_MAIL}?subject=Mi%20pago%20de%20Polaris%20Ac%C3%BAstica%20Pro&amp;body=Hola%2C%20ya%20pagu%C3%A9%20Polaris%20Ac%C3%BAstica%20Pro.%20Mi%20nombre%20o%20correo%20para%20el%20c%C3%B3digo%20es%3A%20">Ya pagué: pedir mi código</a></div>
+    <details class="proact"><summary>Ya tengo un código</summary><div class="row" style="margin-top:8px"><input id="proCode" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Pega aquí tu código" aria-label="Código Pro"><button class="btn pri" id="proGo" type="button">Activar</button></div></details>
+    <p class="note" style="margin-top:10px">Transparencia: el código se comprueba dentro de la app, sin servidor. Es una forma de apoyar el proyecto; técnicamente podría saltarse editando el código.</p>`;
+  }
+  if(on){
+    if(PRO.lic)h+=`<p class="note">Licencia de: <b>${esc(PRO.lic.n)}</b> · desde ${esc(PRO.lic.d||"")}. <button class="lnk" id="proOff" type="button">Quitar licencia de este dispositivo</button></p>`;
+    h+=`<h3>Datos del informe PDF</h3>
+    <div class="row"><label>Tu nombre o empresa<input id="brBiz" type="text" value="${esc(br.biz)}" placeholder="Ej. Estudio Acústico López"></label><label>Cliente o espacio<input id="brCli" type="text" value="${esc(br.cli)}" placeholder="Ej. Sala de juntas, piso 3"></label></div>
+    <div class="btns"><button class="btn pri" id="proPdf" type="button">Generar informe PDF</button><button class="btn" id="proSave" type="button">Guardar esta medición</button></div>
+    <h3>Proyectos guardados (${ps.length})</h3>`;
+    if(!ps.length)h+=`<p class="note">Aún no hay proyectos. Mide un espacio y pulsa <i>Guardar esta medición</i>.</p>`;
+    else{h+=`<ul class="projs">`+ps.map(p=>`<li><label class="pk"><input type="checkbox" data-p="${p.id}" ${PRO.sel.includes(p.id)?"checked":""}><span><b>${esc(p.name||p.useN)}</b><small>${fdt(p.ts)} · ${esc(p.useN)}${p.ex?" · datos de ejemplo":""}${p.cal==="no"?" · dB sin calibrar":""}</small></span></label><button class="lnk" data-del="${p.id}" type="button">Borrar</button></li>`).join("")+`</ul><p class="note">Marca dos proyectos para compararlos.</p>`;
+      if(PRO.sel.length===2){const A=ps.find(p=>p.id===PRO.sel[0]),B=ps.find(p=>p.id===PRO.sel[1]);if(A&&B)h+=proCompare(A,B)}}
+  }
+  h+=`<div class="rev"><h3>¿Quieres que revise tu espacio?</h3><p class="note">Si prefieres una opinión humana, mándame tu informe y platicamos qué conviene hacer. Disponible para todos, con o sin Pro. Es una orientación; no sustituye una medición profesional.</p><div class="btns"><button class="btn" id="proRev" type="button">Solicitar revisión de mi espacio</button><button class="btn" id="proRevCopy" type="button">Copiar informe</button></div></div>
+  <p class="note" id="proMsg" role="status">${esc(PRO.msg)}</p>`;
+  el.innerHTML=h}
+function proCompare(A,B){const rows=[["Puntuación",A.score,B.score,"",1],["Ruido LAeq (dB(A))",A.laeq,B.laeq,"",-1],["T mid (s)",A.T,B.T,"",0],["Claridad C50 (dB)",A.c50,B.c50,"",1],["Aislamiento (dB)",A.iso,B.iso,"",1]];
+  const cell=v=>v==null?"—":v;const d=(a,b)=>a==null||b==null?"—":(b-a>0?"+":"")+Math.round((b-a)*100)/100;
+  let h=`<div class="cmp"><table><thead><tr><th></th><th>${esc(A.name||A.useN)}<small>${fdt(A.ts)}</small></th><th>${esc(B.name||B.useN)}<small>${fdt(B.ts)}</small></th><th>Cambio</th></tr></thead><tbody>`;
+  rows.forEach(r=>{h+=`<tr><td>${r[0]}</td><td>${cell(r[1])}</td><td>${cell(r[2])}</td><td>${d(r[1],r[2])}</td></tr>`});
+  const bf=A.bands.map(x=>x[0]);bf.forEach((f,i)=>{const a=A.bands[i][1],b=B.bands[i]?B.bands[i][1]:null;if(a!=null||b!=null)h+=`<tr><td>T ${f>=1000?f/1000+" kHz":f+" Hz"} (s)</td><td>${cell(a)}</td><td>${cell(b)}</td><td>${d(a,b)}</td></tr>`});
+  h+=`</tbody></table></div>`;if(A.ex||B.ex)h+=`<p class="note">Alguno de los proyectos usa datos de ejemplo.</p>`;if(A.cal==="no"||B.cal==="no"||A.dev!==B.dev)h+=`<p class="note">Los decibelios solo son comparables si se midieron con el mismo micrófono, calibrado y con la misma ganancia. Los tiempos de eco sí son comparables.</p>`;return h}
+async function proSetLic(code,quiet){const o=await proVerify(code);if(!o){PRO.msg="Ese código no es válido. Revisa que lo hayas pegado completo.";proRender();return false}
+  PRO.lic=o;sv("psl_lic",String(code).trim());if(!quiet)PRO.msg="Pro activada. Gracias por apoyar el proyecto.";proRender();return true}
+/* PDF sin librerías: páginas en canvas → JPEG → PDF */
+function wrapText(g,t,w){const out=[];String(t).split("\n").forEach(par=>{let l="";par.split(/\s+/).forEach(wd=>{const x=l?l+" "+wd:wd;if(g.measureText(x).width>w&&l){out.push(l);l=wd}else l=x});out.push(l)});return out}
+function loadLogo(){return new Promise(res=>{try{const bg=getComputedStyle(document.querySelector(".lg")).backgroundImage,m=/url\("?(.*?)"?\)$/.exec(bg);if(!m)return res(null);const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=m[1]}catch(e){res(null)}})}
+async function buildPdf(br){
+  const W=1190,H=1684,M=90,CW=W-2*M,pages=[],ev=evaluate(),logo=await loadLogo(),ci=calInfo();let cv,g,y;
+  const INK="#14181f",MUTE="#5b6472",LINE="#d5dae3",AC="#2f54d6";
+  const newPage=()=>{cv=document.createElement("canvas");cv.width=W;cv.height=H;g=cv.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,W,H);pages.push(cv);y=M;
+    g.fillStyle=MUTE;g.font="22px Helvetica,Arial,sans-serif";g.textBaseline="alphabetic";g.textAlign="left";g.fillText("Polaris Sound Lab · Mérida, Yucatán, México · @polaris.sound.lab",M,H-50);g.textAlign="right";g.fillText("Página "+pages.length,W-M,H-50);g.textAlign="left"};
+  const need=h=>{if(y+h>H-M-30)newPage()};
+  const text=(t,size,col,bold,gap)=>{g.font=(bold?"bold ":"")+size+"px Helvetica,Arial,sans-serif";g.fillStyle=col||INK;wrapText(g,t,CW).forEach(l=>{need(size*1.5);y+=size*1.2;g.fillText(l,M,y);y+=size*.3});y+=gap||0};
+  const rule=()=>{need(20);g.fillStyle=LINE;g.fillRect(M,y+8,CW,2);y+=24};
+  newPage();
+  if(logo){const s=150;g.drawImage(logo,M,y,s,s);g.font="bold 54px Helvetica,Arial,sans-serif";g.fillStyle=INK;g.fillText("Informe acústico",M+s+30,y+70);g.font="26px Helvetica,Arial,sans-serif";g.fillStyle=MUTE;g.fillText(new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}),M+s+30,y+112);y+=s+20}
+  else{text("Informe acústico",54,INK,true,10)}
+  if(br.biz)text("Preparado por: "+br.biz,30,INK,true);
+  if(br.cli)text("Espacio / cliente: "+br.cli,30,INK,false);
+  text("Uso evaluado: "+ev.u.n+(Vol()?` · ${S.dims.l} × ${S.dims.w} × ${S.dims.h} m (${f1(Vol())} m³)`:""),26,MUTE,false,6);
+  if(S.nex||S.tex)text("Atención: este informe incluye datos de ejemplo, no una medición real.",26,"#b4531a",true);
+  rule();
+  if(ev.score!==undefined){need(150);g.fillStyle="#e4eaff";g.fillRect(M,y,CW,130);g.fillStyle=AC;g.font="bold 78px Helvetica,Arial,sans-serif";g.fillText(ev.score+"/100",M+28,y+92);g.fillStyle=INK;g.font="26px Helvetica,Arial,sans-serif";g.fillText("Puntuación para este uso",M+330,y+80);y+=160}
+  text("Resultados",38,INK,true,6);
+  if(ev.L!==undefined)text(`Ruido de fondo: ${f1(ev.L)} dB(A) (objetivo ≤ ${ev.u.noise[0]}). NC: ${ncRating(S.noise.oct,calOf(S.noise))} (objetivo NC-${ev.u.nc}).`,28,INK,false,6);
+  if(ev.T!==undefined){text(`Reverberación T mid: ${f2(ev.T)} s (objetivo ${f2(ev.u.rt[0])}–${f2(ev.u.rt[1])} s).`,28,INK,false,4);
+    text(RTB.map(f=>{const b=ev.R.bands[f];return b&&b.t?`${f>=1000?f/1000+" kHz":f+" Hz"}: ${f2(b.t)} s`:null}).filter(Boolean).join("   ·   "),24,MUTE,false,6);
+    if(ev.R.c50!=null)text(`Claridad C50: ${f1(ev.R.c50)} dB.`,28,INK,false,6)}
+  {const I=isoCalc(S.iso);if(I)text(`Aislamiento (500 Hz–2 kHz): ${I.lim?"≥ ":""}${f1(I.D)} dB (objetivo ≥ ${ISO_T[S.use]}).`,28,INK,false,6)}
+  if(ev.R&&ev.R.flutter)text(`Posible eco repetitivo cada ${Math.round(ev.R.flutter.lag)} ms.`,28,INK,false,6);
+  if(ci.kind==="no")text(`Aviso: los decibelios no están calibrados (±5 a ±10 dB). Micrófono: ${ci.dev}. Los tiempos de eco y la claridad no dependen de la calibración.`,24,"#b4531a",false,6);
+  else if(ci.kind==="ok")text(`Micrófono calibrado: ${ci.dev}.`,24,MUTE,false,6);
+  rule();text("Plan recomendado",38,INK,true,6);
+  buildRecs(ev).forEach((r,i)=>{need(120);text(`${i+1}. ${r.t}`,30,INK,true,0);if(r.p){text("Problema: "+r.p,25,INK,false,0);text("Ideal: "+r.ideal,25,INK,false,0);text("Solución: "+r.sol,25,INK,false,10)}else y+=8});
+  rule();text("Medición orientativa: no sustituye una medición profesional hecha con equipo certificado. Los objetivos por uso son referencias generales.",24,MUTE,false,0);
+  return pages.map(c=>{const d=atob(c.toDataURL("image/jpeg",.88).split(",")[1]),u=new Uint8Array(d.length);for(let i=0;i<d.length;i++)u[i]=d.charCodeAt(i);return u})}
+function pdfAssemble(jpgs,W,H){const enc=new TextEncoder(),parts=[],offs=[];let len=0;
+  const push=x=>{const b=typeof x==="string"?enc.encode(x):x;parts.push(b);len+=b.length};
+  const obj=(n,body)=>{offs[n]=len;push(n+" 0 obj\n");push(body);push("\nendobj\n")};
+  push("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");const n=jpgs.length,kids=[];
+  obj(1,"<< /Type /Catalog /Pages 2 0 R >>");
+  for(let i=0;i<n;i++)kids.push((3+i*3)+" 0 R");
+  obj(2,`<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${n} >>`);
+  const PW=595,PH=Math.round(595*H/W);
+  jpgs.forEach((j,i)=>{const p=3+i*3,im=p+1,ct=p+2;
+    obj(p,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /XObject << /Im0 ${im} 0 R >> >> /Contents ${ct} 0 R >>`);
+    offs[im]=len;push(`${im} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${W} /Height ${H} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${j.length} >>\nstream\n`);push(j);push("\nendstream\nendobj\n");
+    const c=`q ${PW} 0 0 ${PH} 0 0 cm /Im0 Do Q`;obj(ct,`<< /Length ${c.length} >>\nstream\n${c}\nendstream`)});
+  const total=3+n*3,xr=len;let x=`xref\n0 ${total}\n0000000000 65535 f \n`;for(let i=1;i<total;i++)x+=String(offs[i]).padStart(10,"0")+" 00000 n \n";
+  x+=`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`;push(x);
+  const out=new Uint8Array(len);let o=0;parts.forEach(p=>{out.set(p,o);o+=p.length});return out}
+async function proPdf(){const m=PRO;m.msg="Generando PDF…";$("#proMsg").textContent=m.msg;
+  try{const br=brand(),jp=await buildPdf(br),pdf=pdfAssemble(jp,1190,1684);window.__lastPdf=pdf;
+    const blob=new Blob([pdf],{type:"application/pdf"}),fn="informe-polaris-acustica.pdf";
+    try{const dl=window.claude&&claude.use?await claude.use("downloads"):null;if(dl){let s="";for(let i=0;i<pdf.length;i+=8192)s+=String.fromCharCode.apply(null,pdf.subarray(i,i+8192));await dl.save({filename:fn,data:btoa(s),encoding:"base64"});m.msg="PDF guardado.";proRender();return}}catch(e){}
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();m.msg="PDF generado ("+jp.length+(jp.length===1?" página":" páginas")+"). Revisa tus descargas."}
+  catch(e){m.msg="No se pudo generar el PDF aquí."}
+  const el=$("#proMsg");if(el)el.textContent=m.msg}
+function proRevMail(){const body="Hola, quiero que revises mi espacio.\n\nMi nombre:\nQué uso le doy al espacio:\n\n--- Informe de la app ---\n"+reportText(true);
+  return"mailto:"+PRO_MAIL+"?subject="+encodeURIComponent("Revisión de mi espacio (Polaris Acústica)")+"&body="+encodeURIComponent(body.slice(0,1800))}
+(function proInit(){const el=$("#pro");if(!el)return;
+  el.addEventListener("click",async e=>{const t=e.target.closest("button,summary");if(!t)return;const id=t.id;
+    if(id==="proGo"){await proSetLic($("#proCode").value)}
+    else if(id==="proOff"){PRO.lic=null;try{localStorage.removeItem("psl_lic")}catch(x){};PRO.msg="Licencia quitada de este dispositivo.";proRender()}
+    else if(id==="proSave"){if(S.nex&&S.tex){PRO.msg="Primero mide tu espacio: ahora solo hay datos de ejemplo.";proRender();return}
+      const p=proSummary(),br=brand();p.name=(br.cli||"").trim();const L=projs();L.unshift(p);sv("psl_proj",L.slice(0,60));PRO.msg="Medición guardada en este dispositivo.";proRender()}
+    else if(id==="proPdf"){await proPdf()}
+    else if(id==="proRev"){const a=document.createElement("a");a.href=proRevMail();a.click();PRO.msg="Se abrió tu correo con el informe. Si no se abrió, copia el informe y escríbeme a "+PRO_MAIL+".";$("#proMsg").textContent=PRO.msg}
+    else if(id==="proRevCopy"){try{await navigator.clipboard.writeText(reportText(true));PRO.msg="Informe copiado. Pégalo en un correo a "+PRO_MAIL+"."}catch(x){PRO.msg="No se pudo copiar. Usa «Copiar informe» en la sección de exportar."}$("#proMsg").textContent=PRO.msg}
+    else if(t.dataset.del){sv("psl_proj",projs().filter(p=>p.id!==t.dataset.del));PRO.sel=PRO.sel.filter(i=>i!==t.dataset.del);proRender()}});
+  el.addEventListener("change",e=>{const c=e.target;if(c.dataset&&c.dataset.p){const i=c.dataset.p;PRO.sel=c.checked?PRO.sel.concat(i).slice(-2):PRO.sel.filter(x=>x!==i);proRender()}});
+  el.addEventListener("input",e=>{if(e.target.id==="brBiz"||e.target.id==="brCli"){sv("psl_brand",{biz:$("#brBiz").value,cli:$("#brCli").value})}});
+  const saved=(()=>{try{return JSON.parse(localStorage.getItem("psl_lic"))}catch(x){return null}})();
+  proRender();if(saved)proSetLic(saved,true)})();
+
+let _trw=trialActive();setInterval(()=>{const a=trialActive();if(a!==_trw){_trw=a;update()}else if(a&&window.proRender){proBar();const t=$("#pro .tag");if(t)t.textContent="Prueba · "+trialLabel()}},60000);
 /* inicio con datos de ejemplo */
 S.noise=exampleNoise();S.nex=true;S.takes=[exampleImpulse()];S.tex=true;
 paintUses();setMode(S.mode);update();
-window.__resona={S,analyzeNoise,analyzeImpulse,evaluate,buildRecs,exampleNoise,exampleImpulse,makeSweep,deconv,fftConv,synthIR,lisTmap,isoCalc,calInfo,detectFlutter,bandpass,rng,RTB,reportText,csvText,shopItems,synthVoice};
+window.__resona={trialActive,trialLeft,proOn,FREE_STEPS,proVerify,proSetLic,proSummary,buildPdf,pdfAssemble,PRO,S,analyzeNoise,analyzeImpulse,evaluate,buildRecs,exampleNoise,exampleImpulse,makeSweep,deconv,fftConv,synthIR,lisTmap,isoCalc,calInfo,detectFlutter,bandpass,rng,RTB,reportText,csvText,shopItems,synthVoice};
 </script>
 
 <script>
