@@ -1,0 +1,30 @@
+{
+  "name": "Polaris Acústica",
+  "short_name": "Polaris",
+  "description": "Mide el ruido y el eco de tu espacio y recibe un plan para mejorarlo. Por Polaris Sound Lab.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08050e",
+  "theme_color": "#08050e",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

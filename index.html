@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08050e"><meta name="description" content="Mide el ruido y el eco de tu espacio y recibe un plan para mejorarlo. Por Polaris Sound Lab.">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="icons/favicon.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Polaris"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:title" content="Polaris Acústica"><meta property="og:description" content="Mide el ruido y el eco de tu espacio y recibe un plan para mejorarlo."><meta property="og:image" content="icons/icon-512.png">
+<style>html{color-scheme:light dark}body{margin:0}[hidden]{display:none!important}</style></head><body>
+<title>Polaris Acústica</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Concepto: instrumento de laboratorio claro. Una columna de pasos para medir y una columna de resultados que se lee de arriba abajo: veredicto, soluciones, datos técnicos. */
+:root{
+  --bg:#f2f4f7; --surface:#ffffff; --surface2:#f7f8fa; --line:#dfe3ea; --ink:#0f1b2d; --mute:#5b6779;
+  --accent:#2f54d6; --accent-ink:#ffffff; --accent-soft:#e4eaff;
+  --good:#12805a; --good-soft:#dcf3ea; --warn:#a86500; --warn-soft:#fdeccc; --bad:#c23636; --bad-soft:#fbe0e0;
+  --display:"Space Grotesk","Inter",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:14px; --shadow:0 1px 2px rgba(15,27,45,.06),0 6px 20px rgba(15,27,45,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1017; --surface:#131b26; --surface2:#182231; --line:#25324a; --ink:#e8eef6; --mute:#93a1b5;
+  --accent:#7d98ff; --accent-ink:#0b1017; --accent-soft:#1c2a52;
+  --good:#4cd29b; --good-soft:#12352a; --warn:#f0b24a; --warn-soft:#3a2c0f; --bad:#ff7a7a; --bad-soft:#3d1a1a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.3);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1017; --surface:#131b26; --surface2:#182231; --line:#25324a; --ink:#e8eef6; --mute:#93a1b5;
+  --accent:#7d98ff; --accent-ink:#0b1017; --accent-soft:#1c2a52;
+  --good:#4cd29b; --good-soft:#12352a; --warn:#f0b24a; --warn-soft:#3a2c0f; --bad:#ff7a7a; --bad-soft:#3d1a1a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.3);color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);margin:0;padding-block:0 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+.wrap{max-width:1120px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+/* barra superior */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{flex:none}
+.brand b{font:700 20px var(--display);letter-spacing:-.01em}
+.brand span{color:var(--mute);font-size:13px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;flex:none}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:500;color:var(--mute)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+/* rejilla */
+.grid{display:grid;gap:18px;grid-template-columns:minmax(0,1fr);grid-template-areas:"sum" "meas" "recs" "lis" "shop" "det"}
+@media (min-width:900px){.grid{grid-template-columns:minmax(0,380px) minmax(0,1fr);grid-template-areas:"meas sum" "meas recs" "meas lis" "meas shop" "meas det";align-items:start}}
+#sum{grid-area:sum}#meas{grid-area:meas}#recs{grid-area:recs}#det{grid-area:det}#lis{grid-area:lis}#shop{grid-area:shop}#lis[hidden],#shop[hidden]{display:none}
+@media (min-width:900px){#meas{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.card h2{font-size:19px;margin:0 0 4px}
+.fbk{margin-top:20px;text-align:center}
+.fbk p{margin:6px auto 0;max-width:520px;color:var(--mute)}
+.fbk .btns{justify-content:center;margin-top:12px}
+.fbk a.btn{text-decoration:none;display:inline-block;color:var(--ink)}
+.fbk a.btn.pri{color:var(--accent-ink)}
+.fbk .mail{font-family:var(--mono);font-size:13px;color:var(--ink);user-select:all}
+.card h3{font-size:15px;margin:0 0 6px}
+.lead{color:var(--mute);margin:0 0 14px;font-size:14px}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 7px;background:var(--accent-soft);color:var(--accent)}
+.tag.ex{background:var(--warn-soft);color:var(--warn)}
+/* pasos */
+.step{padding:16px 0;border-top:1px solid var(--line)}
+.step:first-of-type{border-top:0;padding-top:4px}
+.sh{display:flex;align-items:center;gap:10px;margin:0 0 6px}
+.sn{width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:600 12px var(--mono);flex:none}
+.step p{margin:0 0 10px;color:var(--mute);font-size:13.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chips button{border:1px solid var(--line);background:var(--surface2);border-radius:999px;padding:6px 12px;font-size:13px}
+.chips button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.dims{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+label.f{display:block;font-size:12px;color:var(--mute)}
+input[type=number],select{width:100%;margin-top:3px;background:var(--surface2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-family:var(--mono);font-size:14px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:10px 14px;font-weight:600;font-size:14px}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:hover{filter:brightness(1.05)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sm{padding:6px 10px;font-size:12.5px;font-weight:500}
+.msg{font-size:13px;min-height:1.3em;margin:8px 0 0;color:var(--mute)}
+.msg.err{color:var(--bad)}
+.live{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px}
+.live .big{font:500 44px/1 var(--mono);letter-spacing:-.02em}
+.live .big small{font-size:16px;color:var(--mute);margin-left:4px}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--accent);width:0}
+canvas{display:block;width:100%}
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+/* resultado */
+.score{display:grid;grid-template-columns:132px minmax(0,1fr);gap:18px;align-items:center}
+@media (max-width:480px){.score{grid-template-columns:96px minmax(0,1fr);gap:14px}}
+.ring{position:relative;width:100%;aspect-ratio:1}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .v{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font:600 34px/1 var(--display)}
+.ring .v small{display:block;font:500 11px var(--body);color:var(--mute);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+.verdict h2{font-size:clamp(20px,4.4vw,26px);margin:0 0 6px;line-height:1.2}
+.verdict p{margin:0;color:var(--mute)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:18px}
+.tile{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.tile .lab{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--mute);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+.tile .val{font:500 30px/1.1 var(--mono);letter-spacing:-.02em}
+.tile .val small{font-size:14px;color:var(--mute);margin-left:3px}
+.pill{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;letter-spacing:0;text-transform:none}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.gauge{position:relative;height:10px;border-radius:6px;margin:16px 0 4px;background:var(--line)}
+.gauge .z{position:absolute;top:0;bottom:0}
+.gauge .z.g{background:var(--good-soft);box-shadow:inset 0 0 0 1px var(--good)}
+.gauge .z.w{background:var(--warn-soft)}
+.gauge .z.b{background:var(--bad-soft)}
+.gauge .m{position:absolute;top:-5px;width:4px;height:20px;border-radius:3px;background:var(--ink);transform:translateX(-50%)}
+.gscale{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--mute)}
+.tile p{font-size:13px;color:var(--mute);margin:10px 0 0}
+/* soluciones */
+.rec{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:14px 0;border-top:1px solid var(--line)}
+.rec:first-of-type{border-top:0}
+.rec h3{font-size:16px;margin:0}
+.rec p{margin:0;color:var(--mute);font-size:14px}
+.rec .q{background:var(--accent-soft);border-radius:9px;padding:8px 10px;font-size:13.5px;color:var(--ink)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.meta span{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:var(--mute)}
+.meta span.hi{border-color:var(--accent);color:var(--accent);font-weight:600}
+/* datos técnicos */
+body:not([data-mode="eng"]) .eng{display:none}
+body[data-mode="eng"] .simp{display:none}
+.panel{margin-top:16px}
+.panel:first-child{margin-top:0}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl th{font-weight:500;color:var(--mute);font-size:12px}
+.scroll{overflow-x:auto}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:0 0 12px}
+.stats div{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.stats b{display:block;font:500 18px var(--mono)}
+.stats span{font-size:11.5px;color:var(--mute)}
+.note{font-size:12.5px;color:var(--mute);margin:10px 0 0}
+.cap{font-size:12.5px;color:var(--mute);margin:6px 0 8px}
+.ib{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);font:italic 700 13px/1 Georgia,"Times New Roman",serif;padding:0;margin-left:6px;vertical-align:middle;flex:none}
+.ib[aria-expanded="true"]{background:var(--accent);color:var(--accent-ink)}
+.infobox{background:var(--accent-soft);border-radius:10px;padding:12px 14px;margin:8px 0 12px;font-size:13.5px;line-height:1.55;color:var(--ink);text-transform:none;letter-spacing:0;font-weight:400}
+.infobox h4{font:600 12px var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin:10px 0 4px}
+.infobox h4:first-child{margin-top:0}
+.infobox p,.infobox ul,.infobox ol{margin:0 0 8px;padding-left:0}
+.infobox ul,.infobox ol{padding-left:20px}
+.infobox li{margin:0 0 4px}
+.infobox p:last-child,.infobox ol:last-child{margin-bottom:0}
+.autoc{border:1px solid var(--accent);background:var(--accent-soft);border-radius:12px;padding:14px;margin:4px 0 12px}
+.autoc b{font-family:var(--display);font-size:16px}
+.autoc p{color:var(--ink);opacity:.85}
+.autoc .infobox{background:var(--surface)}
+.phase{font:600 17px/1.3 var(--display);margin:0 0 8px}
+.ba{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px}
+.ba p{margin:0 0 8px;color:var(--ink)}
+#recs{counter-reset:rc}
+.rec .rh{display:flex;align-items:center;gap:4px}
+.rec.n h3::before{counter-increment:rc;content:counter(rc);display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font:600 12px var(--mono);margin-right:10px;vertical-align:2px}
+.sh.ibrow{flex-wrap:wrap}
+
+/* logotipo Polaris Sound Lab, recoloreado con los colores de la app */
+.lg{display:block;flex:none;aspect-ratio:1;background:url("data:image/webp;base64,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") center/contain no-repeat}
+.lg.sm{width:46px}
+.lg.big{width:min(200px,56%);margin:0 auto}
+.brand b{font:700 18px/1.1 var(--display);letter-spacing:-.01em;display:block}
+.brand span{display:block;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.foot{margin-top:28px;padding-top:22px;border-top:1px solid var(--line);text-align:center;color:var(--mute);font-size:13px}
+.foot .fn{margin:14px 0 2px;font:700 20px/1.1 var(--display);letter-spacing:.14em;color:var(--ink)}
+.foot .fn span{display:block;font:500 12px var(--body);letter-spacing:.3em;color:var(--mute);margin-top:4px}
+.foot p{margin:10px 0 0}
+.calb{margin-top:12px;border-radius:12px;padding:10px 12px;font-size:13.5px;border:1px solid var(--line);background:var(--surface2);color:var(--ink)}
+.calb.w{background:var(--warn-soft);border-color:transparent}
+.calb.g{background:var(--good-soft);border-color:transparent}
+.calb b{display:block;margin-bottom:2px}
+.calb u{text-decoration:none;font-weight:600}
+.calb .btns{margin-top:8px}
+.calb .ibrow{margin-top:6px}
+.disc{margin:10px 0 0;font-size:12.5px;color:var(--mute);border-left:3px solid var(--accent);padding-left:10px}
+.pis{display:grid;gap:8px;margin:2px 0}
+.pis>div{display:grid;grid-template-columns:78px minmax(0,1fr);gap:8px;align-items:start}
+.pis>div>b{font:600 10.5px var(--body);letter-spacing:.06em;text-transform:uppercase;padding-top:4px;color:var(--mute)}
+.pis>div.p>b{color:var(--bad)}.pis>div.i>b{color:var(--good)}.pis>div.s>b{color:var(--accent)}
+.rec .pis p{margin:0;font-size:14px;color:var(--ink)}
+.rec .pis .m p{color:var(--mute)}
+.micsel{border:1px solid var(--line);border-radius:12px;padding:12px;margin:4px 0 12px}
+.micsel b{font-family:var(--display)}
+.micsel select{margin-top:6px}
+.lisb{display:flex;flex-wrap:wrap;gap:8px}
+.shop ul{list-style:none;margin:8px 0;padding:0}
+.shop li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.shop li:first-child{border-top:0}
+.shop li small{grid-column:1/-1;color:var(--mute);font-size:12.5px}
+.shop li span.c{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:var(--mute);white-space:nowrap;align-self:start}
+.isot{margin-top:10px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+ <header class="top">
+  <div class="brand">
+   <div class="lg sm" role="img" aria-label="Polaris Sound Lab"></div>
+   <div><b>Polaris Acústica</b><span>Sound Lab</span></div>
+  </div>
+  <div class="seg" role="group" aria-label="Nivel de detalle"><button type="button" id="mSimple" aria-pressed="true">Simple</button><button type="button" id="mEng" aria-pressed="false">Ingeniero</button></div>
+ </header>
+
+ <div class="grid">
+  <section id="sum" class="card" aria-live="polite"></section>
+
+  <section id="meas" class="card" aria-label="Medir">
+   <h2>Mide tu espacio</h2>
+   <p class="lead">Tres pasos y menos de dos minutos.</p>
+   <div class="step">
+    <div class="sh ibrow"><span class="sn">1</span><h3>¿Para qué es el espacio?</h3><button type="button" class="ib" data-i="use" aria-expanded="false" aria-label="Más información"><span aria-hidden="true">i</span></button></div>
+    <p>Cambia los objetivos de ruido y eco.</p>
+    <div class="chips" id="uses"></div>
+    <p class="ibrow">Medidas del cuarto en metros (opcional). Con ellas calculamos cuánto material absorbente necesitas.<button type="button" class="ib" data-i="dims" aria-expanded="false" aria-label="Más información"><span aria-hidden="true">i</span></button></p>
+    <div class="dims">
+     <label class="f" for="dl">Largo<input id="dl" type="number" min="1" max="60" step="0.1" inputmode="decimal"></label>
+     <label class="f" for="dw">Ancho<input id="dw" type="number" min="1" max="60" step="0.1" inputmode="decimal"></label>
+     <label class="f" for="dh">Alto<input id="dh" type="number" min="1.8" max="15" step="0.1" inputmode="decimal"></label>
+    </div>
+   </div>
+   <div class="step">
+    <div class="sh"><span class="sn">2</span><h3>Medir</h3></div>
+    <div class="micsel">
+     <div class="ibrow"><b>Micrófono</b><button type="button" class="ib" data-i="usb" aria-expanded="false" aria-label="Más información"><span aria-hidden="true">i</span></button></div>
+     <label class="f" for="micSel">Entrada de audio<select id="micSel"><option value="">Predeterminado del sistema</option></select></label>
+     <div class="btns" style="margin-top:8px"><button class="btn sm" id="micScan" type="button">Buscar micrófonos (USB-C)</button></div>
+     <p class="msg" id="micMsg" role="status"></p>
+    </div>
+    <div class="autoc">
+     <div class="ibrow"><b>Medición automática</b> <span class="tag">Recomendado</span><button type="button" class="ib" data-i="auto" aria-expanded="false" aria-label="Más información"><span aria-hidden="true">i</span></button></div>
+     <p>Una sola prueba de unos 25 segundos: primero silencio, luego un aplauso. Polaris Acústica mide ruido y eco y arma tu plan.</p>
+     <div class="btns"><button class="btn pri" id="aGo" type="button">Empezar medición automática</button><label class="btn" for="aFile" style="cursor:pointer">Subir esa grabación</label><input id="aFile" type="file" accept="audio/*" hidden></div>
+     <div id="aLive" class="live" hidden><p class="phase" id="aPhase"></p><div class="big num"><span id="aVal">--</span><small id="aUnit"></small></div><div class="bar"><i id="aBar"></i></div></div>
+     <p class="msg" id="aMsg" role="status"></p>
+    </div>
+    <details id="manual" style="margin-top:6px">
+     <summary>Medir por separado</summary>
+     <div class="sh ibrow" style="margin-top:12px"><h3>Ruido de fondo</h3><button type="button" class="ib" data-i="nrec" aria-expanded="false" aria-label="Más información"><span aria-hidden="true">i</span></button></div>
+     <p>Deja el cuarto como está normalmente, en silencio, y apoya el teléfono sin tocarlo.</p>
+     <label class="f" for="ndur" style="max-width:160px;margin-bottom:10px">Duración<select id="ndur"><option value="15">15 segundos</option><option value="30">30 segundos</option><option value="60">60 segundos</option></select></label>
+     <div class="btns"><button class="btn pri" id="nGo" type="button">Medir ruido</button><label class="btn" for="nFile" style="cursor:pointer">Subir grabación</label><input id="nFile" type="file" accept="audio/*" hidden></div>
+     <div id="nLive" class="live" hidden><div class="big num"><span id="nVal">--</span><small>dB(A)</small></div><div class="bar"><i id="nBar"></i></div><canvas id="nSpec" data-h="70" role="img" aria-label="Espectro en vivo"></canvas></div>
+     <p class="msg" id="nMsg" role="status"></p>
+     <div class="sh ibrow" style="margin-top:12px"><h3>Eco del cuarto</h3><button type="button" class="ib" data-i="rrec" aria-expanded="false" aria-label="Más información"><span aria-hidden="true">i</span></button></div>
+     <p>Párate en el centro, a 2 m del teléfono. Pulsa Medir y da un aplauso fuerte y seco (o revienta un globo). Luego no hables hasta que termine.</p>
+     <div class="btns"><button class="btn pri" id="rGo" type="button">Medir eco</button><label class="btn" for="rFile" style="cursor:pointer">Subir grabación</label><input id="rFile" type="file" accept="audio/*" hidden></div>
+     <div id="rLive" class="live" hidden><div class="big num"><span id="rVal">8</span><small>s</small></div><div class="bar"><i id="rBar"></i></div><canvas id="rWave" data-h="70" role="img" aria-label="Forma de onda en vivo"></canvas></div>
+     <p class="msg" id="rMsg" role="status"></p>
+     <div class="btns" id="rTakes" hidden><button class="btn sm" id="rClear" type="button">Borrar tomas</button></div>
+    </details>
+    <details id="adv" style="margin-top:6px">
+     <summary>Medidas avanzadas</summary>
+     <div class="sh ibrow" style="margin-top:12px"><h3>Eco con barrido</h3><button type="button" class="ib" data-i="sweep" aria-expanded="false" aria-label="Más información"><span aria-hidden="true">i</span></button></div>
+     <p>Reproduce un barrido de 6 s por la bocina y lo graba. Es más parejo que el aplauso, sobre todo en graves. Mejor con una bocina externa; sube el volumen a un nivel firme, sin distorsión.</p>
+     <div class="btns"><button class="btn pri" id="swGo" type="button">Medir con barrido</button></div>
+     <div id="swLive" class="live" hidden><div class="big num"><span id="swVal">--</span><small>s</small></div><div class="bar"><i id="swBar"></i></div></div>
+     <p class="msg" id="swMsg" role="status"></p>
+     <div class="sh ibrow" style="margin-top:14px"><h3>Aislamiento entre dos cuartos</h3><button type="button" class="ib" data-i="iso" aria-expanded="false" aria-label="Más información"><span aria-hidden="true">i</span></button></div>
+     <p>Pon un sonido constante y fuerte (música o ruido rosa) en el cuarto emisor y cierra la puerta. Mide ahí; luego, con el mismo teléfono y sin tocar el volumen de entrada, en el cuarto de al lado. Al final, con la fuente apagada, mide el fondo del receptor.</p>
+     <div class="btns"><button class="btn pri" id="isE" type="button">1 · Medir en el emisor</button><button class="btn pri" id="isR" type="button">2 · Medir en el receptor</button><button class="btn" id="isB" type="button">3 · Fondo del receptor</button><button class="btn sm" id="isC" type="button">Borrar</button></div>
+     <p class="msg" id="isMsg" role="status"></p><div id="isoOut" class="isot"></div>
+    </details>
+   </div>
+   <details id="calD">
+    <summary>Calibración del micrófono</summary><div class="ibrow" style="margin:6px 0"><button type="button" class="ib" data-i="cal" aria-expanded="false" aria-label="Más información" style="margin-left:0"><span aria-hidden="true">i</span></button> <span class="note" style="margin:0">¿Cómo se calibra bien?</span></div>
+    <p class="note">La mejor forma: pon un sonómetro junto al micrófono, genera un ruido constante de 65 a 80 dB(A) (ventilador, ruido rosa), mide 15 s con la app y escribe la lectura (LAeq) del sonómetro. Cada micrófono se calibra por separado y la calibración vale mientras no cambies su ganancia.</p>
+    <div id="calSt" class="calb"></div>
+    <div class="dims" style="grid-template-columns:1fr 1fr"><label class="f" for="cal">Compensación (dB)<input id="cal" type="number" step="0.5" inputmode="decimal"></label><label class="f" for="ref">Lectura del sonómetro<input id="ref" type="number" step="0.5" inputmode="decimal" placeholder="dB(A)"></label></div>
+    <div class="btns" style="margin-top:8px"><button class="btn sm" id="calGo" type="button">Calibrar con la lectura</button></div>
+    <p class="msg" id="calMsg"></p>
+   </details>
+  </section>
+
+  <section id="recs" class="card"></section>
+  <section id="lis" class="card" hidden></section>
+  <section id="shop" class="card shop" hidden></section>
+  <section id="det" class="card eng"></section>
+ </div>
+ <section class="card fbk" id="fbk">
+  <h2>¿Te gusta la app?</h2>
+  <p>¿Tienes sugerencias o algo no funcionó como esperabas? Cuéntamelo: las leo todas.</p>
+  <div class="btns"><a class="btn pri" id="fbMail" href="mailto:drophlex@gmail.com?subject=Sugerencia%20Polaris%20Ac%C3%BAstica">Enviar sugerencia</a><button class="btn" id="fbCopy" type="button">Copiar correo</button></div>
+  <p class="mail">drophlex@gmail.com</p>
+  <p style="margin-top:18px">Si te sirvió mi trabajo, invítame un café.</p>
+  <div class="btns"><a class="btn pri" id="fbPay" href="https://www.paypal.com/donate?business=drophlex%40gmail.com&amp;currency_code=USD&amp;item_name=Caf%C3%A9%20para%20Polaris%20Sound%20Lab" target="_blank" rel="noopener">Invitar un café (PayPal)</a><button class="btn" id="fbPayCopy" type="button">Copiar cuenta de PayPal</button></div>
+  <p class="note" id="fbMsg" role="status" style="margin-top:8px"></p>
+ </section>
+ <footer class="foot"><div class="lg big" role="img" aria-label="Polaris Sound Lab"></div><p>Medición acústica por Polaris Sound Lab</p><p>Mérida, Yucatán, México</p><p><b>@polaris.sound.lab</b></p><p class="disc" style="text-align:left;display:inline-block;max-width:520px">Medición orientativa: no sustituye una medición profesional hecha con equipo certificado.</p></footer>
+</div>
+
+<script>
+"use strict";
+/* ============ utilidades ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const f1=x=>(Math.round(x*10)/10).toFixed(1),f2=x=>(Math.round(x*100)/100).toFixed(2);
+const ld=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ============ objetivos por uso ============ */
+const USES={
+ dorm:{n:"Dormitorio",noise:[30,35],nc:25,rt:[.3,.6]},
+ sala:{n:"Sala o casa",noise:[35,42],nc:30,rt:[.4,.7]},
+ ofic:{n:"Oficina",noise:[40,48],nc:35,rt:[.4,.7]},
+ reun:{n:"Sala de reuniones",noise:[35,42],nc:30,rt:[.4,.6]},
+ aula:{n:"Aula",noise:[35,42],nc:30,rt:[.4,.7]},
+ estu:{n:"Estudio o podcast",noise:[28,35],nc:20,rt:[.2,.4]},
+ cine:{n:"Cine en casa",noise:[30,38],nc:25,rt:[.3,.5]},
+ musi:{n:"Sala de música",noise:[35,42],nc:30,rt:[.6,1.0]},
+ rest:{n:"Restaurante",noise:[45,55],nc:40,rt:[.6,1.0]}};
+const SPEECH={reun:1,aula:1,estu:1,ofic:1};
+const NC={15:[47,36,29,22,17,14,12,11],20:[51,40,33,26,22,19,17,16],25:[54,44,37,31,27,24,22,21],30:[57,48,41,35,31,29,28,27],35:[60,52,45,40,36,34,33,32],40:[64,56,50,45,41,39,38,37],45:[67,60,54,49,46,44,43,42],50:[71,64,58,54,51,49,48,47],55:[74,67,62,59,56,54,53,52],60:[78,71,67,64,63,61,60,59]};
+const OCT=[63,125,250,500,1000,2000,4000,8000];
+const THIRD=[50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000];
+const RTB=[125,250,500,1000,2000,4000];
+
+/* ============ procesamiento de señal ============ */
+const _tw={};
+function fft(re,im){const n=re.length;
+  for(let i=1,j=0;i<n;i++){let b=n>>1;for(;j&b;b>>=1)j^=b;j^=b;if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
+  for(let len=2;len<=n;len<<=1){const h=len>>1;let w=_tw[len];if(!w){w=_tw[len]=new Float64Array(len);for(let k=0;k<h;k++){w[2*k]=Math.cos(2*Math.PI*k/len);w[2*k+1]=-Math.sin(2*Math.PI*k/len)}}
+    for(let i=0;i<n;i+=len)for(let k=0;k<h;k++){const wr=w[2*k],wi=w[2*k+1],a=i+k,b=a+h,xr=re[b]*wr-im[b]*wi,xi=re[b]*wi+im[b]*wr;re[b]=re[a]-xr;im[b]=im[a]-xi;re[a]+=xr;im[a]+=xi}}}
+function aw(f){const f2=f*f;const ra=(12194**2*f2*f2)/((f2+20.6**2)*Math.sqrt((f2+107.7**2)*(f2+737.9**2))*(f2+12194**2));return 20*Math.log10(ra)+2.0}
+const _win={},_bins={};
+function binInfo(N,sr){const key=N+"_"+sr;if(_bins[key])return _bins[key];
+  const w=_win[N]||(_win[N]=(()=>{const a=new Float64Array(N);let s=0;for(let i=0;i<N;i++){a[i]=.5-.5*Math.cos(2*Math.PI*i/N);s+=a[i]*a[i]}a.s2=s;return a})());
+  const K=N/2,wa=new Float64Array(K),tb=new Int16Array(K).fill(-1),df=sr/N;
+  for(let k=1;k<K;k++){const f=k*df;wa[k]=f>=20&&f<=20000?Math.pow(10,aw(f)/10):0;
+    for(let b=0;b<THIRD.length;b++){const lo=THIRD[b]*Math.pow(2,-1/6),hi=THIRD[b]*Math.pow(2,1/6);if(f>=lo&&f<hi){tb[k]=b;break}}}
+  return _bins[key]={w,wa,tb,K,df}}
+/* espectro de potencia de una ventana: devuelve {a:potencia ponderada A, z:potencia total, t:potencia por tercio} */
+function frameSpec(x,start,N,sr){
+  const bi=binInfo(N,sr),re=new Float64Array(N),im=new Float64Array(N);
+  for(let i=0;i<N;i++)re[i]=(x[start+i]||0)*bi.w[i];
+  fft(re,im);const c=2/(N*bi.w.s2);let a=0,z=0;const t=new Float64Array(THIRD.length);
+  for(let k=1;k<bi.K;k++){const p=c*(re[k]*re[k]+im[k]*im[k]),f=k*bi.df;if(f<20||f>20000)continue;z+=p;a+=p*bi.wa[k];if(bi.tb[k]>=0)t[bi.tb[k]]+=p}
+  return{a,z,t}}
+const db10=p=>10*Math.log10(Math.max(p,1e-16));
+function pct(arr,q){const s=arr.slice().sort((a,b)=>a-b);return s[clamp(Math.round(q*(s.length-1)),0,s.length-1)]}
+/* análisis de ruido (valores en dB re fondo de escala; la calibración se suma al mostrar) */
+function analyzeNoise(x,sr){
+  if(x.length<3*sr)throw new Error("La grabación es muy corta. Necesitas al menos 3 segundos.");
+  const N=x.length>=sr*6?16384:8192,hop=Math.round(.25*sr),fr=[];
+  for(let s=0;s+N<=x.length;s+=hop)fr.push(frameSpec(x,s,N,sr));
+  if(!fr.length)throw new Error("No se pudo analizar la grabación.");
+  const la=fr.map(f=>db10(f.a)),meanA=fr.reduce((s,f)=>s+f.a,0)/fr.length,meanZ=fr.reduce((s,f)=>s+f.z,0)/fr.length;
+  const thirds=THIRD.map((_,b)=>db10(fr.reduce((s,f)=>s+f.t[b],0)/fr.length));
+  const tp=THIRD.map((_,b)=>fr.reduce((s,f)=>s+f.t[b],0)/fr.length);
+  const oct=OCT.map((_,i)=>{const b=[[0,1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14],[15,16,17],[18,19,20],[21,22]][i];return db10(b.reduce((s,k)=>s+tp[k],0))});
+  let peak=0;for(let i=0;i<x.length;i+=7)peak=Math.max(peak,Math.abs(x[i]));
+  return{laeq:db10(meanA),lzeq:db10(meanZ),series:la,hop:hop/sr,l10:pct(la,.9),l50:pct(la,.5),l90:pct(la,.1),lmax:Math.max(...la),lmin:Math.min(...la),thirds,oct,dur:x.length/sr,clipped:peak>=.99}}
+/* filtro pasa banda de una octava (RBJ), dos pasadas */
+function bandpass(x,fc,sr){const w0=2*Math.PI*fc/sr,al=Math.sin(w0)/(2*Math.SQRT2),a0=1+al,b0=al/a0,b2=-al/a0,a1=-2*Math.cos(w0)/a0,a2=(1-al)/a0;
+  let y=Float64Array.from(x);for(let p=0;p<2;p++){let x1=0,x2=0,y1=0,y2=0;const o=new Float64Array(y.length);
+    for(let i=0;i<y.length;i++){const v=b0*y[i]+b2*x2-a1*y1-a2*y2;x2=x1;x1=y[i];y2=y1;y1=v;o[i]=v}y=o}return y}
+function regress(db,i0,i1){let n=0,sx=0,sy=0,sxx=0,sxy=0;for(let i=i0;i<=i1;i++){n++;sx+=i;sy+=db[i];sxx+=i*i;sxy+=i*db[i]}const d=n*sxx-sx*sx;if(n<4||!d)return null;const m=(n*sxy-sx*sy)/d;return m<0?-60/m/1000:null}
+function firstBelow(db,lvl){for(let i=0;i<db.length;i++)if(db[i]<=lvl)return i;return -1}
+function detectFlutter(h2,sr){
+  const bk=Math.max(1,Math.round(.001*sr)),n0=Math.round(.04*sr),M=Math.min(600,Math.floor((h2.length-n0)/bk));
+  if(M<220)return null;
+  const e=new Float64Array(M);for(let b=0;b<M;b++){let q=0;for(let k=0;k<bk;k++)q+=h2[n0+b*bk+k];e[b]=q}
+  const r=new Float64Array(M);for(let i=0;i<M;i++){const a=Math.max(0,i-20),c=Math.min(M,i+21);let q=0;for(let j=a;j<c;j++)q+=e[j];const m=q/(c-a);r[i]=m>0?e[i]/m-1:0}
+  let c0=0;for(let i=0;i<M;i++)c0+=r[i]*r[i];if(c0<=0)return null;
+  let best=0,bl=0;for(let lag=15;lag<=150&&lag<M-60;lag++){let q=0;for(let i=0;i+lag<M;i++)q+=r[i]*r[i+lag];q=q/c0*M/(M-lag);if(q>best){best=q;bl=lag}}
+  return best>.45?{lag:bl*bk/sr*1000,r:best}:null}
+/* análisis de respuesta al impulso (aplauso o globo) */
+function analyzeImpulse(x,sr){
+  let pk=0,pi=0;for(let i=0;i<x.length;i++){const a=Math.abs(x[i]);if(a>pk){pk=a;pi=i}}
+  const blk=Math.round(.01*sr),rm=[];for(let i=0;i+blk<=x.length;i+=blk){let s=0;for(let k=0;k<blk;k++)s+=x[i+k]*x[i+k];rm.push(Math.sqrt(s/blk))}
+  const q=Math.max(pct(rm,.2),1e-6),prom=20*Math.log10(pk/q);
+  if(prom<25)throw new Error("No se detectó un aplauso claro. Da un aplauso más fuerte y seco, o usa un globo, y quédate en silencio.");
+  const st=Math.max(0,pi-Math.round(.005*sr)),en=Math.min(x.length,pi+Math.round(4*sr)),seg=x.subarray(st,en);
+  if(seg.length<.3*sr)throw new Error("El aplauso quedó casi al final de la grabación. Aplaude antes y espera a que termine.");
+  const bands={},step=Math.round(.001*sr),bk=Math.round(.005*sr);
+  let c50=null,flutter=null;
+  for(const fc of RTB){
+    if(fc*Math.SQRT2>=sr/2)continue;
+    const y=bandpass(seg,fc,sr),h2=new Float64Array(y.length);for(let i=0;i<y.length;i++)h2[i]=y[i]*y[i];
+    const nb=Math.floor(h2.length/bk),env=new Float64Array(nb);for(let b=0;b<nb;b++){let s=0;for(let k=0;k<bk;k++)s+=h2[b*bk+k];env[b]=s/bk}
+    const tail=Array.from(env.slice(Math.floor(nb*.8))).sort((a,b)=>a-b),N=Math.max(tail[Math.floor(tail.length/2)],1e-20);
+    let pe=0;for(let b=0;b<Math.min(nb,10);b++)pe=Math.max(pe,env[b]);
+    const dr=db10(pe/N);
+    let tr=nb;for(let b=6;b<nb-3;b++){const sm=(env[b]+env[b+1]+env[b+2]+env[b+3])/4;if(sm<N*2){tr=b;break}}
+    const te=Math.min(h2.length,tr*bk);
+    if(te<.1*sr){bands[fc]={fc,fail:true,dr};continue}
+    const E=new Float64Array(te+1);for(let i=te-1;i>=0;i--)E[i]=E[i+1]+h2[i];
+    const curve=[];for(let i=0;i<te;i+=step)curve.push(db10(E[i]/E[0]));
+    const edt=(()=>{const j=firstBelow(curve,-10);return j>2?regress(curve,0,j):null})();
+    const t20=(()=>{const a=firstBelow(curve,-5),b=firstBelow(curve,-25);return a>=0&&b>a+3?regress(curve,a,b):null})();
+    const t30=(()=>{const a=firstBelow(curve,-5),b=firstBelow(curve,-35);return a>=0&&b>a+3?regress(curve,a,b):null})();
+    const conf=t30&&dr>=45?"alta":t20&&dr>=35?"media":"baja";
+    const t=conf==="alta"?t30:conf==="media"?t20:(edt||t20);
+    bands[fc]={fc,edt,t20,t30,t,dr,conf,curve:curve.slice(0,2500),tEnd:te/sr};
+    if(fc===2000)flutter=detectFlutter(h2.subarray(0,te),sr);
+    if(fc===1000){const n50=Math.round(.05*sr);let e0=0,e1=0;for(let i=0;i<te;i++){if(i<n50)e0+=h2[i];else e1+=h2[i]}if(e1>0&&e0>0)c50=db10(e0/e1)}
+  }
+  const ok=Object.values(bands).filter(b=>b.t);
+  if(!ok.length)throw new Error("La grabación tiene demasiado ruido de fondo para medir el eco. Aplaude más fuerte o reduce el ruido.");
+  return{bands,c50,flutter,peakDb:20*Math.log10(pk),prom,clipped:pk>=.99,at:pi/sr}}
+function mergeTakes(takes){
+  if(takes.length===1)return takes[0];
+  const bands={};
+  for(const fc of RTB){const bs=takes.map(t=>t.bands[fc]).filter(b=>b&&b.t);if(!bs.length)continue;
+    const av=k=>{const v=bs.map(b=>b[k]).filter(v=>v);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null};
+    const order={baja:0,media:1,alta:2},conf=bs.map(b=>b.conf).sort((a,b)=>order[a]-order[b])[0];
+    bands[fc]={fc,edt:av("edt"),t20:av("t20"),t30:av("t30"),t:av("t"),dr:av("dr"),conf,curve:bs[0].curve,n:bs.length}}
+  const c=takes.map(t=>t.c50).filter(v=>v!==null);
+  return{bands,c50:c.length?c.reduce((a,b)=>a+b,0)/c.length:null,clipped:takes.some(t=>t.clipped),flutter:takes.map(t=>t.flutter).filter(Boolean).sort((a,b)=>b.r-a.r)[0]||null,dev:takes[0].dev}}
+
+/* ============ ejemplo sintético (se marca como ejemplo en pantalla) ============ */
+function exampleNoise(){
+  const sr=32000,n=sr*24,r=rng(7),x=new Float32Array(n);let b0=0,b1=0,b2=0;
+  for(let i=0;i<n;i++){const w=r()*2-1;b0=.99765*b0+w*.099;b1=.963*b1+w*.2965;b2=.57*b2+w*1.0;x[i]=(b0+b1+b2+w*.18)*.02+.012*Math.sin(2*Math.PI*120*i/sr)+.006*Math.sin(2*Math.PI*60*i/sr)}
+  for(const t of [4,9,14,19]){for(let i=0;i<sr*1.4;i++){const k=Math.floor(t*sr+i);x[k]+=(r()*2-1)*.12*Math.exp(-i/(sr*.7))}}
+  const m=analyzeNoise(x,sr),g=Math.pow(10,(42-100-m.laeq)/20);for(let i=0;i<n;i++)x[i]*=g;
+  const out=analyzeNoise(x,sr);out.example=true;return out}
+function exampleImpulse(){
+  const sr=32000,n=Math.round(sr*3.2),r=rng(11),T={125:1.55,250:1.3,500:1.1,1000:1.05,2000:.92,4000:.75},y=new Float64Array(n);
+  for(const fc of RTB){const w=new Float64Array(n);for(let i=0;i<n;i++)w[i]=r()*2-1;const bp=bandpass(w,fc,sr);let e=0;for(let i=0;i<Math.round(.05*sr);i++)e+=bp[i]*bp[i];const g=1/Math.sqrt(e/(.05*sr));
+    for(let i=0;i<n;i++)y[i]+=bp[i]*g*Math.exp(-6.9078*(i/sr)/T[fc])*(i<20?0:1)}
+  const x=new Float32Array(Math.round(sr*5));const off=Math.round(sr*1.2);let mx=0;for(let i=0;i<n;i++)mx=Math.max(mx,Math.abs(y[i]));
+  for(let i=0;i<x.length;i++)x[i]=(r()*2-1)*.0007;
+  for(let i=0;i<n;i++)x[off+i]+=y[i]/mx*.7;x[off]=.8;
+  const a=analyzeImpulse(x,sr);a.example=true;return a}
+
+/* ============ estado ============ */
+const DEFKEY="Micrófono predeterminado",FILEKEY="Grabación subida";
+const S={use:"reun",dims:{l:6,w:5,h:2.8},calMap:{},devId:"",devLabel:"",devs:[],iso:null,mode:"simple",noise:null,takes:[],tex:false,nex:false};
+{const p=ld("rs_prefs");if(p){if(USES[p.use])S.use=p.use;if(p.dims)S.dims=p.dims;if(p.calMap&&typeof p.calMap==="object")S.calMap=p.calMap;else if(typeof p.cal==="number"&&p.cal!==100)S.calMap[DEFKEY]={off:p.cal,ts:null,man:true};if(typeof p.devLabel==="string")S.devLabel=p.devLabel;if(p.mode==="eng")S.mode="eng"}}
+const savePrefs=()=>sv("rs_prefs",{use:S.use,dims:S.dims,calMap:S.calMap,devLabel:S.devLabel,mode:S.mode});
+const calFor=k=>{const c=S.calMap[k];return c?c.off:100};
+const calOf=m=>m&&m.example?100:calFor(m&&m.dev||DEFKEY);
+const rt=()=>S.takes.length?mergeTakes(S.takes):null;
+const Vol=()=>{const d=S.dims;return d&&d.l>0&&d.w>0&&d.h>0?d.l*d.w*d.h:0};
+function midT(R){if(!R)return null;const v=[500,1000].map(f=>R.bands[f]&&R.bands[f].t).filter(Boolean);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
+function ncRating(oct,cal){for(const k of Object.keys(NC).map(Number)){if(oct.every((v,i)=>v+cal<=NC[k][i]))return k}return ">60"}
+
+
+/* ============ información ampliada (botón i) ============ */
+const OPEN=new Set();let CURRECS=[];
+const ib=k=>`<button type="button" class="ib" data-i="${k}" aria-expanded="false" aria-label="Más información"><span aria-hidden="true">i</span></button>`;
+const GLOSS={
+ usb:{t:"<b>Micrófono externo por USB-C.</b> Un micrófono de medición o de estudio conectado al teléfono casi siempre mide mejor que el integrado. Conéctalo (directo o con adaptador USB-C), pulsa <b>Buscar micrófonos</b> y elígelo en la lista. Los que no piden controladores (llamados <i>class compliant</i>) suelen funcionar sin instalar nada.<ul><li>El nombre que aparece en el resultado (\"Medido con…\") es el micrófono que realmente se usó. Compruébalo: en algunos teléfonos el sistema decide la entrada.</li><li>Cada micrófono necesita su propia calibración.</li><li>Si no aparece, desconéctalo y vuélvelo a conectar, y pulsa Buscar otra vez.</li></ul>",e:"Se usa getUserMedia con deviceId exacto y sin cancelación de eco, supresión de ruido ni control automático de ganancia. La calibración se guarda por etiqueta de dispositivo."},
+ calw:{t:"<b>Por qué importa la calibración.</b> Un micrófono entrega una señal eléctrica, no decibelios. La app la convierte con una constante que no conoce. Sin calibrar, el nivel puede errar varios dB, aunque la forma del espectro y los tiempos de eco sí son correctos.<ul><li><b>Dependen de la calibración:</b> ruido en dB(A), LZeq, LA10/50/90, máx. y mín., curva NC, la parte de ruido de la puntuación y los niveles de cada banda.</li><li><b>No dependen:</b> tiempos de eco, claridad C50 y D50, modos de sala. El aislamiento (diferencia entre dos cuartos) tampoco, si usas el mismo micrófono y la misma ganancia.</li></ul><b>La mejor forma de calibrar:</b> medir el mismo ruido constante con un sonómetro y ajustar aquí la lectura. Mejor entre 65 y 80 dB(A): muy cerca del piso de ruido del micrófono la calibración es menos confiable.",e:"Compensación = LAeq del sonómetro − LAeq medido en dBFS. Sin calibrar se asume 100 dB. Un sonómetro clase 2 o mejor (IEC 61672) es una referencia razonable."},
+ disc:{t:"<b>Esto es una medición orientativa.</b> Sirve para entender tu espacio y decidir qué mejorar. No sustituye una medición profesional: no cumple los requisitos de equipo, procedimiento y posiciones que piden las normas, y no sirve como certificación ni como prueba. Para contratos, normativas, conflictos con vecinos o salas críticas, contrata a un consultor acústico con equipo certificado.",e:"Micrófono de teléfono: sin calibración trazable, respuesta en frecuencia no verificada, fuente de impulso no normalizada. Para tiempo de reverberación en recintos, el procedimiento de referencia es ISO 3382."},
+ iso:{t:"<b>Aislamiento entre dos cuartos.</b> Mide cuántos decibelios se pierden cuando el sonido pasa del cuarto emisor al receptor. Más alto es mejor.<ol><li>Pon música o ruido rosa fuerte y constante en el emisor, con la puerta cerrada.</li><li>Mide ahí 12 s.</li><li>Pasa al receptor con el mismo teléfono y mide 12 s.</li><li>Apaga la fuente y mide el fondo del receptor: así sabemos si el ruido ambiente falsea el resultado.</li></ol>Una rendija pequeña puede arruinar un muro bueno: sella primero.",e:"D por octava = L_emisor − L_receptor (corregido por el fondo si la señal supera al fondo en 6 a 10 dB; si no, se marca como cota inferior). El valor único es el promedio de 500, 1000 y 2000 Hz: es una aproximación, no un índice normalizado (como DnT,w). La calibración se cancela con el mismo micrófono."},
+ sweep:{t:"<b>El barrido</b> es un tono que sube de grave a agudo durante 6 segundos. La app lo reproduce y lo graba. Con un cálculo (deconvolución) obtiene cómo responde el cuarto, sin necesidad de un aplauso fuerte, y es más parejo en graves.<ul><li>La bocina del teléfono casi no reproduce graves: una bocina externa da mejores resultados en 125 y 250 Hz.</li><li>Sube el volumen a un nivel firme pero sin distorsión.</li><li>No hables ni te muevas durante la prueba.</li></ul>",e:"Barrido logarítmico de 60 Hz a min(16 kHz, 0,45·fs), deconvolución por división espectral regularizada, luego el mismo análisis que el aplauso (integral de Schroeder)."},
+ listen:{t:"<b>Escucha la diferencia.</b> La app construye una respuesta de cuarto sintética con los tiempos de eco que mediste y la aplica a una voz de prueba. <b>Ahora</b> es tu cuarto; <b>Después</b> es el mismo cuarto con el eco ajustado al rango recomendado. Usa audífonos o una bocina de buena calidad. Es un modelo: sirve para dar una idea de cuánto cambia, no para prometer un resultado exacto.",e:"Ruido gaussiano filtrado por octavas con decaimiento exponencial por banda (T60 medido), sonido directo con relación directo/reverberante de 0,5, convolución por FFT y misma sonoridad (RMS) en todas las versiones."},
+ flut:{t:"<b>Eco repetitivo (flutter).</b> Cuando dos paredes paralelas y duras se miran, un aplauso rebota entre ellas y suena como un \"tin-tin-tin\" rápido. Se arregla poniendo absorción en una de las dos paredes, o rompiendo el paralelismo con un librero irregular o paneles difusores.",e:"Autocorrelación de la envolvente de la banda de 2 kHz entre 40 y 600 ms; se reporta si el pico entre 15 y 150 ms supera 0,45."},
+ score:{t:"<b>La puntuación</b> compara tu ruido y tu eco con lo recomendado para el uso que elegiste. 85 o más: muy bueno. 65 a 84: bueno con detalles. 40 a 64: se puede mejorar. Menos de 40: hay un problema claro. Si una de las dos medidas falla mucho, la nota no sube aunque la otra esté perfecta.",e:"Cada parte se califica de 0 a 100 (100 dentro del objetivo). La nota final es el promedio, limitado a un máximo de 25 puntos sobre la peor."},
+ noise:{t:"<b>Ruido de fondo</b> es cuánto suena el cuarto cuando nadie habla ni usa nada. Se mide en decibeles ponderados A, dB(A), que dan más peso a lo que el oído humano percibe mejor.<ul><li>30 dB(A): dormitorio muy silencioso de noche</li><li>40: oficina tranquila</li><li>50: conversación suave</li><li>60: conversación normal</li></ul>Cada 10 dB más se oye como el doble de fuerte. Con 3 dB más ya se nota.",e:"LAeq calculado con FFT de 16384 puntos, ventana Hann y ponderación A. Sin calibrar, el micrófono de un teléfono puede errar ±5 a ±10 dB."},
+ rt:{t:"<b>El eco (reverberación)</b> es lo que tarda el sonido en apagarse después de que la fuente se detiene. Se mide en segundos.<ul><li>Muy alto: las voces se mezclan, cuesta entender y el lugar cansa.</li><li>Muy bajo: el cuarto suena apagado y sin vida.</li><li>En rango: la voz se entiende y el sonido es natural.</li></ul>La zona verde de la escala es el rango recomendado para tu espacio. Se corrige con materiales blandos (paneles, cortinas, alfombras) que absorben el sonido.",e:"Tiempo medio de 500 Hz y 1 kHz (RT60 por T20 o T30 según el rango dinámico), con filtros de octava e integral de Schroeder."},
+ use:{t:"<b>El uso cambia la meta.</b> Un dormitorio necesita mucho más silencio que un restaurante, y un estudio de podcast necesita menos eco que una sala de música. Elige el que más se parezca a lo que harás en el cuarto: la app compara tus medidas con ese objetivo.",e:"Los objetivos son valores de referencia aproximados (criterios NC y rangos de RT60 típicos por uso), no una certificación."},
+ dims:{t:"Con el largo, ancho y alto calculamos el volumen del cuarto. Con el volumen y el eco medido, sabemos <b>cuánto material absorbente</b> hace falta para llegar al eco ideal, y cuántos paneles son. También calculamos los modos de sala (graves que se refuerzan).",e:"Sabine: A = 0,161·V/T. Se estima la absorción faltante con la diferencia entre 1/T objetivo y 1/T medido. Panel de 60×120 cm, α ≈ 0,85, equivale a 0,61 sabins."},
+ auto:{t:"<b>La medición automática</b> hace todo en una sola prueba. Primero te pide silencio durante 15 segundos para medir el ruido de fondo. Luego te avisa para que des <b>un aplauso fuerte</b> y escucha cómo se apaga. Con eso calcula el ruido, el eco, la puntuación y un plan de acciones ordenado por impacto.<ol><li>Elige el uso del espacio (paso 1).</li><li>Deja el teléfono quieto, a unos 2 m de donde aplaudirás.</li><li>Pulsa el botón, guarda silencio y aplaude cuando te avise.</li></ol>Si el aplauso no se oyó bien, lo repite hasta 3 veces. Si no puedes usar el micrófono, graba una nota de voz con ese mismo guion (15 s de silencio, un aplauso, 6 s de silencio) y súbela.",e:"Usa un solo flujo de audio sin cancelación de eco, supresión de ruido ni control de ganancia. En el archivo único, el ruido se toma antes del impulso y la respuesta al impulso se toma del aplauso."},
+ plan:{t:"Los pasos van del que más mejora el espacio al que menos. Haz primero el 1 y vuelve a medir. Cada paso tiene un botón <i>i</i> con la explicación completa: por qué pasa, cómo hacerlo paso a paso y cómo comprobar que funcionó.",e:"El orden usa el impacto estimado y, a igual impacto, el menor costo."},
+ nrec:{t:"Mide el ruido cuando el cuarto está como lo usas normalmente, con puertas y ventanas cerradas. Más tiempo da una medida más estable. Evita hablar, tocar el teléfono o caminar cerca.",e:"Se promedia la potencia espectral de ventanas de 0,34 s cada 0,25 s."},
+ rrec:{t:"El aplauso es la forma más simple de excitar el cuarto. Da <b>un solo</b> aplauso fuerte y seco, o revienta un globo. Quédate en silencio hasta que termine: cualquier ruido después tapa el final del eco. Repite 2 o 3 veces para promediar.",e:"Respuesta al impulso por aplauso; filtros de octava de 125 Hz a 4 kHz. Los graves suelen tener menos energía y confianza baja."},
+ cal:{t:"El micrófono de un teléfono no sabe cuántos decibeles reales hay. Por eso el nivel es una estimación. Si tienes un sonómetro (o una app de confianza en otro teléfono), mídelos juntos y escribe su lectura: la app ajusta el nivel. <b>El tiempo de eco no necesita calibración.</b>",e:"El valor de compensación se suma a los dB re fondo de escala. Por defecto 100 dB."},
+ nstats:{t:"<b>Qué significa cada número.</b><ul><li><b>LAeq</b>: nivel promedio del ruido (el número principal).</li><li><b>LZeq</b>: promedio sin ponderar; si es mucho mayor que LAeq, hay mucho ruido grave.</li><li><b>LA10</b>: nivel superado el 10 % del tiempo (los picos habituales).</li><li><b>LA50</b>: nivel típico.</li><li><b>LA90</b>: nivel casi siempre presente (el ruido de base).</li><li><b>LAmax / LAmin</b>: el momento más fuerte y el más tranquilo.</li><li><b>NC</b>: curva de ruido que resume todo el espectro. Menor es mejor.</li></ul>",e:"Percentiles sobre ventanas de 0,25 s. NC por el método de la curva más baja no superada en octavas de 63 Hz a 8 kHz."},
+ nc:{t:"Las barras son el nivel de cada banda de frecuencia, de graves (izquierda) a agudos (derecha). La línea punteada es el límite de la curva <b>NC</b> del uso elegido. Las barras en color de alerta pasan ese límite: ahí está el ruido que conviene atacar.",e:"Tercios de octava de 50 Hz a 8 kHz. La curva NC se interpola entre octavas."},
+ rtstats:{t:"<b>Qué significa cada número.</b><ul><li><b>T mid</b>: eco medio de la voz (500 Hz y 1 kHz). Es el número que más importa.</li><li><b>EDT</b>: lo que parece durar el eco al oído (primeros 10 dB).</li><li><b>T20 / T30</b>: eco calculado con una parte más larga de la caída; más confiable si hay buena señal.</li><li><b>Rango din.</b>: qué tan por encima del ruido estuvo el aplauso. Más alto, mejor.</li><li><b>C50</b>: claridad de la voz. Positivo: las palabras se entienden bien. Negativo: se mezclan con el eco.</li><li><b>D50</b>: porcentaje de energía que llega en los primeros 50 ms.</li></ul>",e:"Pendiente por regresión lineal de la curva de Schroeder: EDT 0 a −10 dB, T20 −5 a −25 dB, T30 −5 a −35 dB. Confianza alta con T30 y 45 dB de rango dinámico, media con T20 y 35 dB, baja con solo EDT."},
+ decay:{t:"Esta curva muestra cómo cae el sonido con el tiempo. Una caída más empinada significa menos eco. La línea punteada es el ajuste que se usa para calcular el tiempo de eco de esa banda.",e:"Integral de Schroeder hacia atrás, truncada donde la energía llega al piso de ruido."},
+ modes:{t:"Todo cuarto refuerza ciertos graves (<b>modos</b>) y anula otros según sus medidas. Por eso un tono grave puede sonar muy fuerte en una esquina y casi desaparecer en otro punto. Si dos modos casi coinciden, ese grave sobresale más. Las trampas de graves y no pegar el sofá a la pared del fondo ayudan.",e:"Modos axiales f = c·n/(2L) con c = 343 m/s, hasta el tercer armónico."}
+};
+function infoHTML(k){
+  if(k.startsWith("rec:")){const r=CURRECS.find(x=>x.id===k.slice(4));if(!r)return"";
+    return`<div class="infobox">${r.why?`<h4>Por qué pasa</h4><p>${esc(r.why)}</p>`:""}${r.how?`<h4>Cómo hacerlo</h4><ol>${r.how.map(h=>`<li>${esc(h)}</li>`).join("")}</ol>`:""}${r.test?`<h4>Cómo saber que funcionó</h4><p>${esc(r.test)}</p>`:""}</div>`}
+  const g=GLOSS[k];if(!g)return"";
+  return`<div class="infobox"><p>${g.t}</p>${g.e?`<p class="eng"><b>Para ingenieros:</b> ${g.e}</p>`:""}</div>`}
+function openInfo(b){const k=b.dataset.i,row=b.closest(".ibrow")||b.parentElement,h=infoHTML(k);if(!h)return;const t=document.createElement("div");t.innerHTML=h;const el=t.firstElementChild;el.dataset.k=k;row.after(el);b.setAttribute("aria-expanded","true");OPEN.add(k)}
+function closeInfo(b){const k=b.dataset.i,row=b.closest(".ibrow")||b.parentElement,n=row.nextElementSibling;if(n&&n.classList.contains("infobox")&&n.dataset.k===k)n.remove();b.setAttribute("aria-expanded","false");OPEN.delete(k)}
+document.addEventListener("click",e=>{const b=e.target.closest(".ib");if(!b)return;b.getAttribute("aria-expanded")==="true"?closeInfo(b):openInfo(b)});
+function restoreInfo(){document.querySelectorAll(".ib").forEach(b=>{if(b.getAttribute("aria-expanded")!=="true"&&OPEN.has(b.dataset.i))openInfo(b)})}
+
+/* ============ evaluación ============ */
+function noiseScore(L,u){const [g,a]=u.noise;return L<=g?100:L<=a?100-(L-g)/(a-g)*30:clamp(70-(L-a)*5,0,100)}
+function rtScore(T,u){const [lo,hi]=u.rt,d=Math.max(0,(T-hi)/hi,(lo-T)/lo);return clamp(100-d*140,0,100)}
+function rtState(T,u){const [lo,hi]=u.rt;if(T>=lo&&T<=hi)return["good","Dentro del rango"];if(T>hi)return T<=hi*1.25?["warn","Un poco alto"]:T<=hi*1.7?["bad","Alto"]:["bad","Muy alto"];return T>=lo*.75?["warn","Un poco seco"]:["bad","Muy seco"]}
+function noiseState(L,u){const [g,a]=u.noise;return L<=g?["good","Silencioso"]:L<=a?["warn","Aceptable"]:L<=a+8?["bad","Alto"]:["bad","Muy alto"]}
+function evaluate(){
+  const u=USES[S.use],out={u,parts:[]};
+  if(S.noise){const L=S.noise.laeq+calOf(S.noise);out.L=L;out.ns=noiseScore(L,u);out.nst=noiseState(L,u);out.parts.push(out.ns)}
+  const R=rt(),T=midT(R)||(R&&Object.values(R.bands).find(b=>b.t)&&Object.values(R.bands).find(b=>b.t).t);
+  if(R&&T){out.R=R;out.T=T;out.rs=rtScore(T,u);out.rst=rtState(T,u);out.parts.push(out.rs)}
+  if(out.parts.length){const avg=out.parts.reduce((a,b)=>a+b,0)/out.parts.length,mn=Math.min(...out.parts);out.score=Math.round(Math.min(avg,mn+25))}
+  return out}
+function headline(ev){
+  const u=ev.u,sc=ev.score;
+  if(sc===undefined)return["Aún sin medir","Mide el ruido y el eco para ver el veredicto."];
+  const issues=[];
+  if(ev.rst&&ev.rst[0]!=="good")issues.push(ev.T>u.rt[1]?"el sonido rebota demasiado":"el espacio suena demasiado seco");
+  if(ev.nst&&ev.nst[0]!=="good")issues.push("hay más ruido de fondo del que conviene");
+  const use=u.n.toLowerCase();
+  if(sc>=85)return["Muy buen espacio","Cumple con lo recomendado para "+use+(ev.R&&ev.nst?".":" en lo que mediste.")];
+  if(sc>=65)return["Bueno, con detalles","Para "+use+": "+issues.join(" y ")+". Es fácil de mejorar."];
+  if(sc>=40)return["Se puede mejorar","Para "+use+": "+issues.join(" y ")+". Abajo tienes qué hacer primero."];
+  return["Necesita atención","Para "+use+": "+issues.join(" y ")+". Empieza por las soluciones de mayor impacto."]}
+
+/* ============ recomendaciones ============ */
+const USE_TIPS={
+ dorm:["Aleja la cama de la pared que da a la calle o a vecinos.","Sella la puerta con burlete y usa cortinas gruesas: ayudan con el ruido y con la luz.","Si hay un ruido constante bajo, un sonido suave y parejo (como un ventilador lejano) tapa los ruidos que aparecen de golpe."],
+ sala:["Pon una alfombra grande bajo los sillones y cortinas de tela gruesa.","Un librero lleno en una pared completa absorbe y dispersa el sonido.","Evita apuntar las bocinas o la TV hacia un muro liso y desnudo."],
+ ofic:["Paneles absorbentes colgados del techo sobre las mesas dan el mayor efecto.","Divisiones de tela de unos 1,4 m entre puestos reducen el ruido de las conversaciones.","Un fondo sonoro suave y parejo mejora la privacidad al hablar."],
+ reun:["Alfombra y paneles en la pared del fondo mejoran la voz en sala y en videollamada.","Pon el micrófono de la sala a menos de 1,5 m de quienes hablan.","Evita mesas de vidrio y paredes de vidrio sin cortina."],
+ aula:["El plafón absorbente de techo es lo más rentable en un aula.","Trata la pared del fondo y deja la pared del frente reflejante para que la voz del docente llegue a todos.","Patas de sillas con fieltro reducen el ruido de arrastre."],
+ estu:["Graba con un micrófono dinámico a 5 a 10 cm de la boca: capta menos eco del cuarto.","Pon paneles detrás de ti y a los lados del micrófono, no solo en las paredes lejanas.","Si no puedes tratar el cuarto, una cobija gruesa o una cabina portátil ayuda mucho."],
+ cine:["Trampas de graves en las esquinas del frente.","Absorbe en los puntos de primera reflexión de las paredes laterales y del techo.","Prueba el subwoofer en distintos lugares y elige donde el grave suene parejo en los asientos."],
+ musi:["Combina absorción con difusión para que no suene muerta.","Evita cuartos de proporciones cúbicas: refuerzan los mismos graves.","Paneles móviles permiten ajustar el sonido según el instrumento."],
+ rest:["Un techo acústico es lo más efectivo en un restaurante.","Mantén superficies blandas: manteles, cortinas y banquetas tapizadas.","Con menos eco la gente habla más bajo y el ruido general baja solo."]};
+function projection(ev){
+  if(ev.T===undefined||!ev.R)return null;const u=ev.u;if(ev.T<=u.rt[1]&&ev.T>=u.rt[0])return null;
+  const tgt=(u.rt[0]+u.rt[1])/2,parts=[];if(ev.ns!==undefined)parts.push(ev.ns);parts.push(rtScore(tgt,u));
+  const sc=Math.round(Math.min(parts.reduce((a,b)=>a+b,0)/parts.length,Math.min(...parts)+25));return{tgt,sc}}
+function buildRecs(ev){
+  const r=[],u=ev.u,V=Vol(),R=ev.R,nz=S.noise;
+  if(R&&ev.T){
+    const T=ev.T,[lo,hi]=u.rt,tgt=(lo+hi)/2;
+    if(T>hi){
+      let q="";
+      if(V){const dA=.161*V*(1/tgt-1/T),n=Math.max(1,Math.ceil(dA/.61)),S2=2*(S.dims.l*S.dims.w+S.dims.l*S.dims.h+S.dims.w*S.dims.h);
+        q=`Para llegar a ${f2(tgt)} s en un cuarto de ${f1(V)} m³ faltan unos ${f1(dA)} m² de absorción equivalente: unos ${n} paneles de 60 × 120 cm con 5 cm de lana mineral o poliéster (${f1(n*.72)} m² de panel).`+(dA>S2*.6?" Es mucho para un solo material: combina paneles con cortinas gruesas y alfombra.":"")}
+      else q="Escribe las medidas del cuarto en el paso 1 y calculamos cuántos paneles necesitas.";
+      r.push({id:"rt",imp:3,cost:2,t:"Agrega absorción para bajar el eco",d:`El eco medio es de ${f2(T)} s y para ${u.n.toLowerCase()} conviene entre ${f2(lo)} y ${f2(hi)} s. Las superficies duras reflejan el sonido y lo prolongan.`,q,
+        cheap:"Más barato: cortinas gruesas, alfombra con bajo-alfombra, libreros llenos, sofás y plantas grandes ayudan sin obra.",
+        why:"Muros lisos, piso de loseta, vidrio y techo de concreto reflejan casi todo el sonido. Cada reflejo llega un instante después del sonido directo y se acumula, así que las palabras se mezclan y el cuarto cansa.",
+        how:["Empieza por los muros laterales: paneles a la altura de la cabeza (de 1 a 2 m del piso), separados unos 60 cm entre sí.","Sigue con la pared del fondo, detrás de quien escucha o de quien habla.","Si el techo es liso, agrega un panel o una nube sobre la mesa o zona de trabajo.","Deja 5 a 10 cm de aire entre el panel y la pared: absorbe más y llega a frecuencias más bajas.","Completa con alfombra gruesa, cortinas pesadas con pliegues que cubran toda la ventana y libreros llenos."],
+        test:`Vuelve a medir el eco: debe bajar hacia ${f2(tgt)} s. Duplicar la absorción reduce el eco a la mitad.`})}
+    if(T<lo)r.push({id:"rtlow",imp:2,cost:1,t:"Devuelve algo de vida al cuarto",d:`El eco medio es de ${f2(T)} s, por debajo de los ${f2(lo)} s recomendados. El espacio suena apagado.`,
+      why:"Con demasiada absorción el sonido se apaga casi al instante: la voz suena opaca y los instrumentos pierden cuerpo.",
+      how:["Retira parte de las cortinas o paneles, o deja absorción solo en una pared.","Agrega superficies que dispersen: libreros irregulares, cuadros grandes, plantas o paneles de madera ranurada.","Si hay alfombra gruesa en todo el piso, prueba dejando la zona central sin cubrir."],test:"Mide de nuevo: el eco debe subir hacia el rango verde."});
+    const b125=R.bands[125],b250=R.bands[250];const lf=[b125,b250].filter(b=>b&&b.t).map(b=>b.t);
+    if(lf.length&&Math.max(...lf)>1.3*T&&Math.max(...lf)>hi)r.push({id:"bass",imp:2,cost:2,t:"Controla los graves con trampas en las esquinas",d:`Los graves (125 a 250 Hz) tardan ${f2(Math.max(...lf))} s en apagarse, más que los medios.`,
+      why:"Las ondas graves son largas (a 100 Hz miden unos 3,4 m), atraviesan los paneles delgados y se acumulan en las esquinas. La espuma fina no las frena.",
+      how:["Instala trampas de graves de 10 a 20 cm de espesor en las esquinas verticales, empezando por las del frente.","Usa lana mineral de alta densidad (60 kg/m³ o más) o paneles hechos para graves.","Si hay espacio, las esquinas entre pared y techo dan una mejora extra.","Evita pegar el sofá o el escritorio a la pared del fondo: refuerza los graves."],test:"Mide otra vez: el eco en 125 y 250 Hz debe acercarse al de 500 Hz."});
+    const b4=R.bands[4000],b2=R.bands[2000];
+    if(b4&&b4.t&&b2&&b2.t&&Math.min(b4.t,b2.t)>1.05*T&&T>hi*.9)r.push({id:"bright",imp:1,cost:1,t:"Hay brillo en los agudos",d:"Las frecuencias altas se apagan tan lento como las medias.",
+      why:"Las superficies duras y lisas reflejan los agudos, que dan sonido áspero o silbante.",how:["Agrega cortinas, tapetes y paneles de tela finos.","Cubre superficies grandes de vidrio con cortinas."],test:"Mide otra vez: el eco en 2 y 4 kHz debe bajar."});
+    if(R.c50!==null&&R.c50!==undefined&&SPEECH[S.use]&&R.c50<-2)r.push({id:"c50",imp:2,cost:2,t:"Mejora la claridad de las voces",d:`La claridad de la voz (C50) es de ${f1(R.c50)} dB: las palabras se mezclan con el eco.`,
+      why:"Cuando el eco llega demasiado pronto tras la voz, las sílabas se traslapan y cuesta entender.",
+      how:["Busca los primeros puntos de reflexión: una persona se sienta, otra desliza un espejo por la pared; donde la persona sentada ve al que habla, va un panel.","Cubre esos puntos en muros laterales y en el techo entre quien habla y quien escucha.","Acerca el micrófono a quien habla."],test:"Mide otra vez: C50 debe subir a 0 dB o más."})}
+  if(nz){
+    const L=ev.L,[g,a]=u.noise;
+    if(L>g){
+      const o=nz.oct,lfd=(o[0]+o[1])/2-(o[4]+o[5])/2,hid=(o[4]+o[5]+o[6])/3-(o[1]+o[2])/2;
+      r.push({id:"nz",imp:L>a?3:2,cost:1,t:"Reduce el ruido de fondo",d:`El ruido es de ${f1(L)} dB(A) y para ${u.n.toLowerCase()} lo ideal es ${u.noise[0]} dB(A) o menos.`,
+        why:"El ruido de fondo viene de equipos (ventilador, aire acondicionado, refrigerador, computadoras), de la calle o de otros cuartos. Cuanto más alto, más cuesta descansar, concentrarse o entender una voz.",
+        how:["Apaga uno por uno ventilador, aire acondicionado, refrigerador y equipos, y mide de nuevo cada vez: así encuentras la fuente.","Cierra puertas y ventanas y vuelve a medir para saber cuánto entra de fuera.","Aleja o cambia de lugar la fuente, o ponle una base elástica.","Si la fuente no se puede apagar, reduce su velocidad o cámbiala por un modelo más silencioso."],test:`Mide de nuevo en el mismo punto: debe bajar hacia ${u.noise[0]} dB(A). Bajar 3 dB ya se nota y 10 dB se oye como la mitad de fuerte.`});
+      if(lfd>14)r.push({id:"nlf",imp:3,cost:2,t:"El ruido es grave: busca motores y ductos",d:"La mayor parte del ruido está en frecuencias bajas.",
+        why:"Ventiladores, compresores, tráfico lejano y ductos de aire producen graves, que atraviesan paredes y no los detiene la espuma.",
+        how:["Pon bases elásticas (goma o resortes) bajo equipos y comprueba que no vibren contra la pared.","Reduce la velocidad del ventilador o cambia el modelo.","En ductos, revisa uniones sueltas y usa silenciadores.","Aísla pared o techo con masa (doble capa de tablaroca con sellador), no con espuma."],test:"Mide otra vez: las octavas de 63 y 125 Hz deben bajar."});
+      else if(hid>-2)r.push({id:"nhf",imp:3,cost:1,t:"Sella puertas y ventanas",d:"El ruido tiene mucho contenido medio y agudo, que entra por rendijas.",
+        why:"Una rendija de un milímetro deja pasar más sonido que el muro completo. Voces, bocinas y tráfico entran por ahí.",
+        how:["Pon burletes en el marco de puertas y ventanas.","Pon felpa o barredor bajo la puerta.","Usa cortinas pesadas o vidrio laminado.","Sella con silicón los cortes de cables y tubos."],test:"Mide otra vez con puertas y ventanas cerradas: el ruido debe bajar varios dB."});
+      if(nz.l10-nz.l90>10)r.push({id:"nvar",imp:2,cost:2,t:"El ruido va y viene",d:`Entre los momentos más fuertes y los más tranquilos hay ${f1(nz.l10-nz.l90)} dB de diferencia.`,
+        why:"Suele ser tráfico, voces o puertas. Los ruidos que aparecen de golpe molestan más que uno parejo del mismo nivel.",
+        how:["Anota a qué hora ocurren los picos.","Mejora el aislamiento de ventanas y puertas antes que tratar el interior.","Un sonido suave y parejo en el fondo reduce el contraste."],test:"Mide otra vez: la diferencia L10 − L90 debe bajar de 10 dB."})}
+    const th=nz.thirds.map(v=>v+calOf(nz));
+    for(let i=3;i<=20;i++){const nb=Math.max(th[i-1],th[i+1]);if(th[i]-nb>=6){const hz=THIRD[i];
+      r.push({id:"tone",imp:2,cost:1,t:`Hay un zumbido cerca de ${hz} Hz`,d:`Una banda sobresale ${f1(th[i]-nb)} dB sobre las vecinas.`,
+        why:hz<=250?"En esas frecuencias suele ser un transformador, balastra, refrigerador o ventilador. La red eléctrica zumba a 60 Hz y a 120 Hz.":"Suele ser un motor, ventilador o electrónica.",
+        how:["Apaga equipos de uno en uno hasta que el zumbido desaparezca.","Mueve el equipo, ponle base elástica o cámbialo si es el origen.","Si es de la instalación eléctrica, pide una revisión a un electricista."],test:"Mide otra vez: esa barra debe quedar al nivel de las vecinas."});break}}}
+  if(R&&R.flutter){const d=343*R.flutter.lag/2000;r.push({id:"flut",imp:2,cost:1,t:"Posible eco repetitivo entre dos paredes",d:`Se detectó una repetición regular cada ${Math.round(R.flutter.lag)} ms, que corresponde a dos superficies duras y paralelas a unos ${f1(d)} m.`,
+    why:"Un aplauso rebota una y otra vez entre dos paredes lisas y paralelas (o piso y techo), y suena como un \"tin-tin-tin\" rápido que ensucia la voz y la música.",
+    how:["Identifica las dos superficies paralelas separadas unos "+f1(d)+" m: aplaude entre ellas y escucha el rebote.","Cubre una de las dos con un panel absorbente o una cortina gruesa.","O rompe el paralelismo: librero irregular, cuadros grandes con relieve o un panel difusor.","Si es piso y techo, una alfombra gruesa suele bastar."],test:"Aplaude otra vez entre las paredes: el \"tin-tin\" debe desaparecer y la detección no debe repetirse."})}
+  {const I=isoCalc(S.iso),tg=ISO_T[S.use];if(I&&I.D<tg){const w=I.rows.reduce((a,b)=>b.D<a.D?b:a);r.push({id:"iso",imp:I.D<tg-8?3:2,cost:3,t:"Mejora el aislamiento hacia el cuarto vecino",d:`Entre los dos cuartos se pierden unos ${f1(I.D)} dB (500 Hz a 2 kHz) y para ${u.n.toLowerCase()} conviene al menos ${tg} dB. La banda más débil es la de ${w.f} Hz.`,
+    why:"El sonido pasa por el aire (rendijas, puertas huecas, cajas eléctricas, ductos) y por la estructura. Una rendija de un milímetro puede arruinar un muro bueno. Lo que manda es la masa y el sellado, no la espuma.",
+    how:["Sella primero: burlete perimetral en la puerta, barredor abajo, silicón en cajas eléctricas, pasos de tubo y marcos.","La puerta suele ser el punto débil: una puerta maciza con burlete aísla mucho más que una hueca.","Agrega masa en el muro compartido: una segunda capa de tablaroca con sellador entre capas.","Si el ruido es grave, desacopla con bases elásticas o perfiles resilientes.","La espuma o los paneles absorbentes NO aíslan: solo bajan el eco dentro del cuarto."],test:"Repite la prueba con la misma fuente y las mismas posiciones: D debe subir. Cada 10 dB más se oye como la mitad de fuerte."})}}
+  if(!nz)r.push({id:"nomed",imp:1,cost:0,t:"Falta medir el ruido de fondo",d:"Mide el ruido para completar la evaluación."});
+  if(!R)r.push({id:"nomed2",imp:1,cost:0,t:"Falta medir el eco",d:"Aplaude en el paso 2 para conocer el tiempo de reverberación."});
+  r.sort((a,b)=>b.imp-a.imp||a.cost-b.cost);
+  r.forEach(x=>Object.assign(x,pisFor(x,ev)||{}));
+  r.push({id:"tips",imp:0,cost:0,nonum:1,t:`Ajustes finos para ${u.n.toLowerCase()}`,d:"Consejos que no se miden pero hacen diferencia en este tipo de espacio.",how:USE_TIPS[S.use],why:""});
+  r.push({id:"again",imp:0,cost:0,nonum:1,t:"Vuelve a medir después de cada cambio",d:"Mide en el mismo punto del cuarto y a la misma hora. Así ves cuánto mejoró cada cosa.",how:["Usa la misma duración y la misma posición del teléfono.","Guarda la medición como \"antes\" en el resultado para comparar."],why:""});
+  return r}
+
+/* ============ vista: resultado ============ */
+const impTxt=["","Impacto bajo","Impacto medio","Impacto alto"],costTxt=["","Costo bajo","Costo medio","Costo alto"];
+function gauge(kind,ev){
+  if(kind==="n"){const u=ev.u,min=20,max=80,p=v=>clamp((v-min)/(max-min)*100,0,100);
+    return`<div class="gauge" role="img" aria-label="Escala de ruido"><span class="z g" style="left:${p(min)}%;width:${p(u.noise[0])-p(min)}%"></span><span class="z w" style="left:${p(u.noise[0])}%;width:${p(u.noise[1])-p(u.noise[0])}%"></span><span class="z b" style="left:${p(u.noise[1])}%;right:0"></span><span class="m" style="left:${p(ev.L)}%"></span></div><div class="gscale"><span>20</span><span>40</span><span>60</span><span>80 dB(A)</span></div>`}
+  const u=ev.u,max=2,p=v=>clamp(v/max*100,0,100);
+  return`<div class="gauge" role="img" aria-label="Escala de eco"><span class="z g" style="left:${p(u.rt[0])}%;width:${p(u.rt[1])-p(u.rt[0])}%"></span><span class="m" style="left:${p(ev.T)}%"></span></div><div class="gscale"><span>0</span><span>0,5</span><span>1</span><span>1,5</span><span>2 s</span></div>`}
+function renderSum(ev){
+  const sc=ev.score,h=headline(ev),col=sc===undefined?"var(--mute)":sc>=65?"var(--good)":sc>=40?"var(--warn)":"var(--bad)",C=2*Math.PI*52,off=sc===undefined?C:C*(1-sc/100);
+  const ex=[S.nex&&S.noise?"ruido":"",S.tex&&S.takes.length?"eco":""].filter(Boolean);
+  let h2=`<div class="score"><div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/></svg><div class="v" style="color:${col}"><span>${sc===undefined?"--":sc}<small>de 100</small></span></div></div>
+   <div class="verdict">${ex.length?`<span class="tag ex">Datos de ejemplo: ${ex.join(" y ")}</span><br>`:""}<h2>${esc(h[0])}${ib("score")}</h2><p>${esc(h[1])}</p></div></div><div class="tiles">`;
+  if(ev.L!==undefined)h2+=`<div class="tile"><div class="lab ibrow"><span>Ruido de fondo${ib("noise")}</span><span class="pill ${ev.nst[0]}">${ev.nst[1]}</span></div><div class="val num">${f1(ev.L)}<small>dB(A)</small></div>${calInfo().kind==="no"?'<span class="pill warn" style="margin-top:4px">Sin calibrar ±8 dB</span>':""}${gauge("n",ev)}<p>Lo ideal para ${esc(ev.u.n.toLowerCase())} es ${ev.u.noise[0]} dB(A) o menos.</p></div>`;
+  else h2+=`<div class="tile"><div class="lab ibrow"><span>Ruido de fondo${ib("noise")}</span></div><div class="val num">--</div><p>Mide el ruido en el paso 2.</p></div>`;
+  if(ev.T!==undefined)h2+=`<div class="tile"><div class="lab ibrow"><span>Eco (reverberación)${ib("rt")}</span><span class="pill ${ev.rst[0]}">${ev.rst[1]}</span></div><div class="val num">${f2(ev.T)}<small>s</small></div>${gauge("r",ev)}<p>Lo ideal es entre ${f2(ev.u.rt[0])} y ${f2(ev.u.rt[1])} s. La zona verde es ese rango.</p></div>`;
+  else h2+=`<div class="tile"><div class="lab ibrow"><span>Eco (reverberación)${ib("rt")}</span></div><div class="val num">--</div><p>Mide el eco en el paso 3.</p></div>`;
+  h2+=isoTile(ev)+"</div>"+calBanner();
+  h2+=baHTML(ev);
+  $("#sum").innerHTML=h2;
+  $("#sum").querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>baAct(b.dataset.act,ev))}
+function loadBefore(){return ld("rs_before")}
+function baHTML(ev){
+  if(ev.score===undefined)return"";const bf=loadBefore(),real=(S.noise&&!S.nex)||(S.takes.length&&!S.tex);let h='<div class="ba">';
+  if(bf&&bf.use!==S.use)h+=`<p class="note">Tu medición "antes" es de otro uso (${esc((USES[bf.use]||{}).n||"")}). Cambia a ese uso para compararla o guarda una nueva.</p>`;
+  else if(bf){const d=ev.score-bf.score,cls=d>0?"good":d<0?"bad":"warn";
+    h+=`<p><b>Antes y después.</b> Antes: ${bf.score} puntos${bf.L!=null?` · ${f1(bf.L)} dB(A)`:""}${bf.T!=null?` · ${f2(bf.T)} s`:""}. Ahora: ${ev.score} puntos${ev.L!==undefined?` · ${f1(ev.L)} dB(A)`:""}${ev.T!==undefined?` · ${f2(ev.T)} s`:""}. <span class="pill ${cls}">${d>0?"+":""}${d} puntos</span></p>`}
+  h+=`<div class="btns"><button class="btn sm" data-act="save" ${real?"":'disabled title="Haz una medición propia primero"'}>Guardar como "antes"</button>${bf?'<button class="btn sm" data-act="clear">Borrar "antes"</button>':""}</div>${real?"":'<p class="note">Mide tu espacio para poder guardar un "antes".</p>'}</div>`;return h}
+function baAct(a,ev){if(a==="calnow"){const d=$("#calD");d.open=true;d.scrollIntoView({behavior:"smooth",block:"center"});return}if(a==="save"){sv("rs_before",{score:ev.score,L:ev.L!==undefined?ev.L:null,T:ev.T!==undefined?ev.T:null,use:S.use,ts:Date.now()})}else sv("rs_before",null);update()}
+function renderRecs(ev){
+  const rs=buildRecs(ev);CURRECS=rs;const pj=projection(ev);
+  let proj="";
+  if(pj){const u=ev.u;proj=`<div class="q" style="margin:0 0 6px"><b>Resultado esperado.</b> Si aplicas la absorción, el eco pasaría de ${f2(ev.T)} a cerca de ${f2(pj.tgt)} s y la puntuación de ${ev.score} a unos ${pj.sc}.${ev.nst&&ev.nst[0]!=="good"?` Para superar 85 puntos también hay que bajar el ruido a ${u.noise[0]} dB(A) o menos.`:""} Es una estimación con la fórmula de Sabine.</div>`}
+  $("#recs").innerHTML=`<div class="ibrow" style="display:flex;align-items:center"><h2 style="margin:0">Tu plan</h2>${ib("plan")}</div><p class="lead">Ordenado de lo que más mejora a lo que menos. Toca la <i>i</i> de cada paso para ver por qué pasa y cómo hacerlo.</p>${proj}`+rs.map(x=>`<div class="rec${x.nonum?"":" n"}"><div class="rh ibrow"><h3>${esc(x.t)}</h3>${x.how||x.why?ib("rec:"+x.id):""}</div>${pisHTML(x)}${x.q?`<div class="q">${esc(x.q)}</div>`:""}${x.cheap?`<p>${esc(x.cheap)}</p>`:""}${x.imp?`<div class="meta"><span class="hi">${impTxt[x.imp]}</span>${x.cost?`<span>${costTxt[x.cost]}</span>`:""}</div>`:""}</div>`).join("")}
+/* ============ vista: datos técnicos ============ */
+function modesList(){const d=S.dims;if(!(d&&d.l>0&&d.w>0&&d.h>0))return"";const c=343;
+  const all=[];[["Largo",d.l],["Ancho",d.w],["Alto",d.h]].forEach(([n,L])=>{for(let k=1;k<=3;k++)all.push({n,k,f:c*k/(2*L)})});
+  all.sort((a,b)=>a.f-b.f);
+  const close=[];for(let i=1;i<all.length;i++)if(all[i].f<300&&all[i].f-all[i-1].f<=5)close.push(i);
+  return`<div class="panel"><h3>Modos de sala (axiales)${ib("modes")}</h3><p class="cap">Frecuencias donde el cuarto refuerza o anula los graves. Cuando dos modos quedan a menos de 5 Hz hay un pico más fuerte${close.length?`. En tu cuarto coinciden: ${close.map(i=>`${f1(all[i-1].f)} y ${f1(all[i].f)} Hz`).join("; ")}`:""}.</p><div class="scroll"><table class="tbl"><tr><th>Dimensión</th><th>1.º</th><th>2.º</th><th>3.º</th></tr>${["Largo","Ancho","Alto"].map(n=>`<tr><td>${n}</td>${[1,2,3].map(k=>`<td class="num">${f1(all.find(a=>a.n===n&&a.k===k).f)} Hz</td>`).join("")}</tr>`).join("")}</table></div></div>`}
+let selBand=1000;
+function renderDet(ev){
+  const nz=S.noise,R=ev.R,parts=[];
+  if(nz){const c=calOf(nz),nc=ncRating(nz.oct,c);
+    parts.push(`<div class="panel"><h3>Ruido${ib("nstats")}${calInfo().kind==="no"?' <span class="pill warn">Sin calibrar ±8 dB</span>':""}</h3><div class="stats"><div><b>${f1(nz.laeq+c)}</b><span>LAeq dB(A)</span></div><div><b>${f1(nz.lzeq+c)}</b><span>LZeq dB</span></div><div><b>${f1(nz.l10+c)}</b><span>LA10</span></div><div><b>${f1(nz.l50+c)}</b><span>LA50</span></div><div><b>${f1(nz.l90+c)}</b><span>LA90</span></div><div><b>${f1(nz.lmax+c)}</b><span>LAmax</span></div><div><b>${f1(nz.lmin+c)}</b><span>LAmin</span></div><div><b>NC-${nc}</b><span>Objetivo NC-${ev.u.nc}</span></div></div>
+    <p class="cap">Espectro en tercios de octava (barras) y curva NC del objetivo (línea). Las barras sobre la curva aparecen en color de alerta.${ib("nc")}</p><canvas id="cSpec" data-h="230" role="img" aria-label="Espectro de ruido en tercios de octava"></canvas>
+    <p class="cap" style="margin-top:14px">Nivel a lo largo de la grabación (ventanas de 0,34 s cada 0,25 s)</p><canvas id="cTime" data-h="150" role="img" aria-label="Nivel de ruido en el tiempo"></canvas>
+    <div class="scroll" style="margin-top:10px"><table class="tbl"><tr><th>Octava (Hz)</th>${OCT.map(f=>`<th>${f}</th>`).join("")}</tr><tr><td>Nivel dB</td>${nz.oct.map(v=>`<td class="num">${f1(v+c)}</td>`).join("")}</tr><tr><td>NC-${ev.u.nc} máx.</td>${NC[ev.u.nc].map(v=>`<td class="num">${v}</td>`).join("")}</tr></table></div>
+    <p class="note">${f1(nz.dur)} s analizados. Ponderación A por FFT de 16384 puntos con ventana Hann. Medido con: ${esc(nz.dev||"ejemplo")}. Compensación de calibración: ${f1(c)} dB${S.calMap[nz.dev]||nz.example?"":" (sin calibrar)"}. ${nz.clipped?"La señal saturó el micrófono: baja el volumen de entrada o aleja el teléfono de la fuente.":""}</p></div>`)}
+  if(R){const bs=RTB.map(f=>R.bands[f]).filter(Boolean);
+    parts.push(`<div class="panel"><h3>Reverberación${ib("rtstats")} <span class="pill good">No depende de la calibración</span></h3><div class="stats"><div><b>${f2(ev.T)} s</b><span>T mid (500-1k)</span></div><div><b>${R.c50!=null?f1(R.c50)+" dB":"--"}</b><span>C50 a 1 kHz</span></div><div><b>${R.c50!=null?Math.round(100/(1+Math.pow(10,-R.c50/10)))+" %":"--"}</b><span>D50</span></div><div><b>${S.takes.length}</b><span>${S.takes.length===1?"toma":"tomas"}</span></div></div>
+    <p class="cap">Tiempo de reverberación por octava frente al rango objetivo (zona sombreada).</p><canvas id="cRt" data-h="190" role="img" aria-label="Reverberación por banda de octava"></canvas>
+    <div class="scroll" style="margin-top:10px"><table class="tbl"><tr><th>Banda</th><th>EDT</th><th>T20</th><th>T30</th><th>Rango din.</th><th>Confianza</th></tr>${bs.map(b=>`<tr><td>${b.fc} Hz</td><td class="num">${b.edt?f2(b.edt):"--"}</td><td class="num">${b.t20?f2(b.t20):"--"}</td><td class="num">${b.t30?f2(b.t30):"--"}</td><td class="num">${b.dr?f1(b.dr)+" dB":"--"}</td><td>${b.fail?"sin datos":b.conf||"--"}</td></tr>`).join("")}</table></div>
+    <p class="cap" style="margin-top:14px">Curva de decaimiento (integral de Schroeder) de la banda:${ib("decay")}</p><div class="chips" id="bsel">${bs.filter(b=>b.curve).map(b=>`<button type="button" data-f="${b.fc}" aria-pressed="${b.fc===selBand}">${b.fc} Hz</button>`).join("")}</div><canvas id="cDec" data-h="190" role="img" aria-label="Curva de decaimiento"></canvas>
+    <p class="note">Filtros de octava de cuarto orden. Confianza alta: T30 con 45 dB de rango dinámico; media: T20 con 35 dB; baja: solo EDT (aplaude más fuerte o reduce el ruido). Los graves con aplauso suelen tener poca energía y confianza baja. ${R.clipped?"Una toma saturó el micrófono.":""}</p></div>`)}
+  parts.push(modesList());
+  parts.push(`<div class="panel"><div class="btns"><button class="btn" id="bCopy" type="button">Copiar informe</button><button class="btn" id="bCsv" type="button">Descargar CSV</button></div><p class="msg" id="exMsg" role="status"></p></div>`);
+  $("#det").innerHTML=`<h2>Datos técnicos</h2><p class="lead">Mediciones por banda, curvas y métricas normalizadas.</p>`+parts.join("");
+  $("#bCopy").onclick=copyReport;$("#bCsv").onclick=saveCsv;
+  const bs=$("#bsel");if(bs)bs.querySelectorAll("button").forEach(b=>b.onclick=()=>{selBand=+b.dataset.f;renderDet(ev);drawAll(ev)})}
+
+/* ============ gráficas ============ */
+const col=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function cv(id){const c=$(id);if(!c||!c.getBoundingClientRect().width)return null;const w=c.getBoundingClientRect().width,h=+c.dataset.h||160,d=window.devicePixelRatio||1;c.width=Math.round(w*d);c.height=Math.round(h*d);c.style.height=h+"px";const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);g.font="11px "+col("--mono");return{g,w,h}}
+function axes(g,w,h,L,R,T,B,y0,y1,ystep,fmt){g.strokeStyle=col("--line");g.fillStyle=col("--mute");g.lineWidth=1;g.textAlign="right";g.textBaseline="middle";
+  for(let v=y0;v<=y1+1e-9;v+=ystep){const y=T+(h-T-B)*(1-(v-y0)/(y1-y0));g.beginPath();g.moveTo(L,y);g.lineTo(w-R,y);g.stroke();g.fillText(fmt(v),L-5,y)}}
+function ncAt(nc,f){const x=Math.log2(f/63),i=clamp(Math.floor(x),0,6),t=clamp(x-i,0,1),a=NC[nc][i],b=NC[nc][i+1];return a+(b-a)*t}
+function drawSpec(ev){const o=cv("#cSpec");if(!o||!S.noise)return;const{g,w,h}=o,L=34,R=8,T=8,B=22,c=calOf(S.noise),th=S.noise.thirds.map(v=>v+c);
+  const y0=Math.max(0,Math.floor((Math.min(...th)-5)/10)*10),y1=Math.max(60,Math.ceil((Math.max(...th)+5)/10)*10);axes(g,w,h,L,R,T,B,y0,y1,10,v=>v);
+  const bw=(w-L-R)/th.length,Y=v=>T+(h-T-B)*(1-(v-y0)/(y1-y0));
+  th.forEach((v,i)=>{const lim=ncAt(ev.u.nc,THIRD[i]);g.fillStyle=v>lim?col("--warn"):col("--accent");const x=L+i*bw+bw*.15;g.fillRect(x,Y(v),bw*.7,Y(y0)-Y(v))});
+  g.strokeStyle=col("--ink");g.lineWidth=1.6;g.setLineDash([5,3]);g.beginPath();THIRD.forEach((f,i)=>{const x=L+i*bw+bw/2,y=Y(ncAt(ev.u.nc,f));i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();g.setLineDash([]);
+  g.fillStyle=col("--mute");g.textAlign="center";g.textBaseline="top";[[50,"50"],[100,"100"],[200,"200"],[500,"500"],[1000,"1k"],[2000,"2k"],[4000,"4k"],[8000,"8k"]].forEach(([f,t])=>{const i=THIRD.indexOf(f);g.fillText(t,L+i*bw+bw/2,h-B+6)})}
+function drawTime(){const o=cv("#cTime");if(!o||!S.noise)return;const{g,w,h}=o,L=34,R=8,T=8,B=20,c=calOf(S.noise),s=S.noise.series.map(v=>v+c);
+  const y0=Math.floor((Math.min(...s)-4)/10)*10,y1=Math.ceil((Math.max(...s)+4)/10)*10;axes(g,w,h,L,R,T,B,y0,y1,10,v=>v);
+  const X=i=>L+(w-L-R)*i/Math.max(1,s.length-1),Y=v=>T+(h-T-B)*(1-(v-y0)/(y1-y0));
+  g.strokeStyle=col("--accent");g.lineWidth=1.8;g.beginPath();s.forEach((v,i)=>i?g.lineTo(X(i),Y(v)):g.moveTo(X(i),Y(v)));g.stroke();
+  const le=S.noise.laeq+c;g.strokeStyle=col("--ink");g.setLineDash([5,3]);g.lineWidth=1;g.beginPath();g.moveTo(L,Y(le));g.lineTo(w-R,Y(le));g.stroke();g.setLineDash([]);
+  g.fillStyle=col("--mute");g.textAlign="center";g.textBaseline="top";const d=S.noise.hop*(s.length-1);[0,.5,1].forEach(k=>{g.textAlign=k===0?"left":k===1?"right":"center";g.fillText(Math.round(d*k)+" s",L+(w-L-R)*k,h-B+5)})}
+function drawRt(ev){const o=cv("#cRt");if(!o||!ev.R)return;const{g,w,h}=o,L=34,R=8,T=8,B=22,bs=RTB.map(f=>ev.R.bands[f]).filter(b=>b&&b.t),max=Math.max(1,Math.ceil(Math.max(...bs.map(b=>b.t),ev.u.rt[1])*5)/5);
+  axes(g,w,h,L,R,T,B,0,max,max>2?.5:.25,v=>f2(v).replace(/0$/,""));const Y=v=>T+(h-T-B)*(1-v/max),bw=(w-L-R)/RTB.length;
+  g.fillStyle=col("--good-soft");g.fillRect(L,Y(ev.u.rt[1]),w-L-R,Y(ev.u.rt[0])-Y(ev.u.rt[1]));g.strokeStyle=col("--good");g.lineWidth=1;g.strokeRect(L,Y(ev.u.rt[1]),w-L-R,Y(ev.u.rt[0])-Y(ev.u.rt[1]));
+  RTB.forEach((f,i)=>{const b=ev.R.bands[f];if(!b||!b.t)return;const out=b.t>ev.u.rt[1]||b.t<ev.u.rt[0];g.globalAlpha=b.conf==="baja"?.55:1;g.fillStyle=out?col("--warn"):col("--accent");g.fillRect(L+i*bw+bw*.2,Y(b.t),bw*.6,Y(0)-Y(b.t));g.globalAlpha=1;g.fillStyle=col("--ink");g.textAlign="center";g.textBaseline="bottom";g.fillText(f2(b.t),L+i*bw+bw/2,Y(b.t)-2)});
+  g.fillStyle=col("--mute");g.textBaseline="top";RTB.forEach((f,i)=>g.fillText(f>=1000?(f/1000)+"k":f,L+i*bw+bw/2,h-B+6))}
+function drawDec(){const o=cv("#cDec"),R=rt();if(!o||!R)return;const b=R.bands[selBand]||Object.values(R.bands).find(x=>x.curve);if(!b||!b.curve)return;
+  const{g,w,h}=o,L=34,Rr=8,T=8,B=22,cu=b.curve,tmax=cu.length/1000;axes(g,w,h,L,Rr,T,B,-60,0,10,v=>v);
+  const X=i=>L+(w-L-Rr)*i/Math.max(1,cu.length-1),Y=v=>T+(h-T-B)*(1-(clamp(v,-60,0)+60)/60);
+  g.strokeStyle=col("--accent");g.lineWidth=1.8;g.beginPath();cu.forEach((v,i)=>i?g.lineTo(X(i),Y(v)):g.moveTo(X(i),Y(v)));g.stroke();
+  const tt=b.t;if(tt){g.strokeStyle=col("--warn");g.setLineDash([5,3]);g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(Math.min(cu.length-1,tt*1000)),Y(-60*Math.min(cu.length-1,tt*1000)/(tt*1000)));g.stroke();g.setLineDash([])}
+  g.fillStyle=col("--mute");g.textAlign="center";g.textBaseline="top";[0,.5,1].forEach(k=>{g.textAlign=k===0?"left":k===1?"right":"center";g.fillText(f2(tmax*k)+" s",L+(w-L-Rr)*k,h-B+5)})}
+let CURV=null;
+function drawAll(ev){if(S.mode!=="eng")return;ev=ev||CURV;if(!ev)return;drawSpec(ev);drawTime();drawRt(ev);drawDec()}
+
+/* ============ informe y exportación ============ */
+function reportText(){const ev=evaluate(),u=ev.u,L=[`POLARIS ACÚSTICA · ${u.n}`];
+  if(Vol())L.push(`Recinto: ${S.dims.l} × ${S.dims.w} × ${S.dims.h} m (${f1(Vol())} m³)`);
+  if(ev.score!==undefined)L.push(`Puntuación: ${ev.score}/100`);
+  if(ev.L!==undefined){L.push(`Ruido LAeq: ${f1(ev.L)} dB(A) (objetivo ≤ ${u.noise[0]})${S.noise.example?" [ejemplo]":""}`);L.push(`NC: ${ncRating(S.noise.oct,calOf(S.noise))} (objetivo NC-${u.nc})`)}
+  if(ev.T!==undefined){L.push(`T mid: ${f2(ev.T)} s (objetivo ${f2(u.rt[0])}-${f2(u.rt[1])})${S.tex?" [ejemplo]":""}`);RTB.forEach(f=>{const b=ev.R.bands[f];if(b&&b.t)L.push(`  ${f} Hz: ${f2(b.t)} s (${b.conf})`)})}
+  {const ci=calInfo();L.push("");if(ci.kind==="no")L.push(`AVISO: decibelios sin calibrar (±5 a ±10 dB). Micrófono: ${ci.dev}. Dependen de la calibración: ruido dB(A), NC y la parte de ruido de la puntuación. No dependen: tiempos de eco, C50/D50, modos.`);else if(ci.kind==="ok")L.push(`Micrófono calibrado: ${ci.dev}${ci.c.man?" (ajuste manual)":" (con sonómetro)"}.`)}
+  {const I=isoCalc(S.iso);if(I)L.push(`Aislamiento (500 Hz-2 kHz): ${I.lim?"≥ ":""}${f1(I.D)} dB (objetivo ≥ ${ISO_T[S.use]})`)}
+  if(ev.R&&ev.R.flutter)L.push(`Posible eco repetitivo cada ${Math.round(ev.R.flutter.lag)} ms`);
+  L.push("","Plan (problema · ideal · solución):");buildRecs(ev).forEach((r,i)=>{L.push(`${i+1}. ${r.t}`);if(r.p){L.push(`   Problema: ${r.p}`,`   Ideal: ${r.ideal}`,`   Solución: ${r.sol}`)}});
+  L.push("","Medición orientativa: no sustituye una medición profesional hecha con equipo certificado.","Polaris Sound Lab · Mérida, Yucatán, México · @polaris.sound.lab");return L.join("\n")}
+async function copyReport(){const m=$("#exMsg"),t=reportText();try{await navigator.clipboard.writeText(t);m.textContent="Informe copiado."}catch(e){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();m.textContent=ok?"Informe copiado.":"No se pudo copiar automáticamente."}}
+function csvText(){const rows=[["tipo","banda_hz","valor","unidad"]],ev=evaluate();
+  if(S.noise){const c=calOf(S.noise);rows.push(["ruido","LAeq",f1(S.noise.laeq+c),"dB(A)"],["ruido","LA10",f1(S.noise.l10+c),"dB(A)"],["ruido","LA90",f1(S.noise.l90+c),"dB(A)"]);THIRD.forEach((f,i)=>rows.push(["ruido_tercio",f,f1(S.noise.thirds[i]+c),"dB"]));OCT.forEach((f,i)=>rows.push(["ruido_octava",f,f1(S.noise.oct[i]+c),"dB"]))}
+  if(ev.R){RTB.forEach(f=>{const b=ev.R.bands[f];if(b&&b.t)rows.push(["rt",f,f2(b.t),"s"],["edt",f,b.edt?f2(b.edt):"","s"])});if(ev.R.c50!=null)rows.push(["c50",1000,f1(ev.R.c50),"dB"])}
+  {const ci=calInfo();rows.push(["calibracion",S.noise?S.noise.dev||"ejemplo":"",ci.kind==="ok"?"calibrado":ci.kind==="no"?"SIN CALIBRAR":ci.kind,""]);const I=isoCalc(S.iso);if(I)I.rows.forEach(x=>rows.push(["aislamiento",x.f,(x.lim?">=":"")+f1(x.D),"dB"]));rows.push(["aviso","","Medicion orientativa; no sustituye una medicion profesional",""])}
+  return rows.map(r=>r.join(",")).join("\n")}
+async function saveCsv(){const m=$("#exMsg"),data=csvText();
+  try{const dl=window.claude&&claude.use?await claude.use("downloads"):null;if(dl){await dl.save({filename:"polaris-medicion.csv",data});m.textContent="Archivo guardado.";return}}catch(e){m.textContent="No se guardó el archivo.";return}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"text/csv"}));a.download="polaris-medicion.csv";document.body.appendChild(a);a.click();a.remove();m.textContent="Archivo generado."}catch(e){m.textContent="Aquí no se pueden descargar archivos. Usa Copiar informe."}}
+
+/* ============ captura de micrófono y archivos ============ */
+let MIC=null;
+async function openMic(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error("mic");
+  const base={echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1};let stream,fell=false;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:S.devId?Object.assign({deviceId:{exact:S.devId}},base):base})}
+  catch(e){if(S.devId&&(e.name==="OverconstrainedError"||e.name==="NotFoundError")){fell=true;stream=await navigator.mediaDevices.getUserMedia({audio:base})}else throw e}
+  const trk=stream.getAudioTracks()[0],dev=(trk&&trk.label)||DEFKEY;
+  const AC=window.AudioContext||window.webkitAudioContext,ctx=new AC(),src=ctx.createMediaStreamSource(stream),proc=ctx.createScriptProcessor(4096,1,1),mute=ctx.createGain();mute.gain.value=0;
+  src.connect(proc);proc.connect(mute);mute.connect(ctx.destination);if(ctx.state==="suspended")await ctx.resume();
+  if(fell){const mm=$("#micMsg");if(mm){mm.className="msg err";mm.textContent="El micrófono elegido no estaba disponible. Se usó el predeterminado."}}
+  if(!S.devs.length||S.devs.some(d=>!d.id))setTimeout(()=>scanMics(false),0);
+  return{stream,ctx,src,proc,mute,sr:ctx.sampleRate,dev}}
+function closeMic(m){try{m.proc.onaudioprocess=null;m.src.disconnect();m.proc.disconnect();m.stream.getTracks().forEach(t=>t.stop());m.ctx.close()}catch(e){}}
+function micError(e,msgEl){msgEl.className="msg err";msgEl.textContent=(e&&(e.name==="NotAllowedError"||e.message==="mic"||e.name==="SecurityError"))?"Este navegador o vista no permite usar el micrófono. Sube una grabación (la grabadora del teléfono sirve) o abre Polaris Acústica como archivo o app instalada para medir en vivo.":"No se pudo abrir el micrófono: "+(e&&e.message?e.message:"error desconocido")}
+async function decodeFile(file){const buf=await file.arrayBuffer();const AC=window.AudioContext||window.webkitAudioContext,ctx=new AC();try{const ab=await ctx.decodeAudioData(buf);const ch=ab.getChannelData(0),x=new Float32Array(ch.length);x.set(ch);return{x,sr:ab.sampleRate}}finally{try{ctx.close()}catch(e){}}}
+let busy=false;
+function setBusy(b){busy=b;["nGo","rGo","aGo","swGo","isE","isR","isB","micScan"].forEach(i=>$("#"+i).disabled=b)}
+function applyNoise(x,sr,msg,dev){const m=analyzeNoise(x,sr);m.dev=dev||FILEKEY;S.noise=m;S.nex=false;msg.className="msg";msg.textContent="Listo: "+f1(m.laeq+calFor(m.dev))+" dB(A)"+(S.calMap[m.dev]?"":" (sin calibrar)")+" en "+Math.round(m.dur)+" s."+(m.clipped?" La señal saturó el micrófono.":"")}
+function applyImpulse(x,sr,msg,dev){const a=analyzeImpulse(x,sr);a.dev=dev||FILEKEY;if(S.tex){S.takes=[];S.tex=false}S.takes.push(a);msg.className="msg";msg.textContent="Toma "+S.takes.length+" lista."+(a.clipped?" El aplauso saturó el micrófono: aleja el teléfono o aplaude más suave.":"")+(S.takes.length<3?" Repite una o dos veces más para promediar.":"")}
+async function measureNoise(){
+  if(busy)return;const msg=$("#nMsg");msg.className="msg";msg.textContent="Pidiendo acceso al micrófono…";let m;
+  try{m=await openMic()}catch(e){micError(e,msg);return}
+  setBusy(true);const dur=+$("#ndur").value,chunks=[],N=16384,ring=new Float32Array(N);let got=0,last=0;
+  $("#nLive").hidden=false;msg.textContent="Midiendo. Mantén silencio y no toques el teléfono.";
+  await new Promise(res=>{m.proc.onaudioprocess=ev=>{const d=ev.inputBuffer.getChannelData(0),c=new Float32Array(d.length);c.set(d);chunks.push(c);got+=c.length;
+    ring.copyWithin(0,c.length);ring.set(c.subarray(Math.max(0,c.length-N)),N-Math.min(c.length,N));
+    const s=got/m.sr;$("#nBar").style.width=Math.min(100,s/dur*100)+"%";
+    if(got>=N&&performance.now()-last>180){last=performance.now();const sp=frameSpec(ring,0,N,m.sr);$("#nVal").textContent=f1(db10(sp.a)+calFor(m.dev));drawLiveSpec(sp.t,calFor(m.dev))}
+    if(s>=dur)res()}});
+  closeMic(m);const x=new Float32Array(got);let o=0;for(const c of chunks){x.set(c,o);o+=c.length}
+  $("#nLive").hidden=true;
+  try{applyNoise(x,m.sr,msg,m.dev)}catch(e){msg.className="msg err";msg.textContent=e.message}
+  setBusy(false);update()}
+function drawLiveSpec(t,cal){const o=cv("#nSpec");if(!o)return;const{g,w,h}=o,v=Array.from(t).map(p=>db10(p)+cal),mn=20,mx=90,bw=w/v.length;g.fillStyle=col("--accent");v.forEach((d,i)=>{const hh=clamp((d-mn)/(mx-mn),0,1)*(h-4);g.fillRect(i*bw+1,h-hh,bw-2,hh)})}
+async function measureImpulse(){
+  if(busy)return;const msg=$("#rMsg");msg.className="msg";msg.textContent="Pidiendo acceso al micrófono…";let m;
+  try{m=await openMic()}catch(e){micError(e,msg);return}
+  setBusy(true);const dur=8,chunks=[];let got=0,last=0;$("#rLive").hidden=false;msg.textContent="Escuchando. Da un aplauso fuerte y quédate en silencio.";
+  await new Promise(res=>{m.proc.onaudioprocess=ev=>{const d=ev.inputBuffer.getChannelData(0),c=new Float32Array(d.length);c.set(d);chunks.push(c);got+=c.length;const s=got/m.sr;
+    $("#rVal").textContent=Math.max(0,Math.ceil(dur-s));$("#rBar").style.width=Math.min(100,s/dur*100)+"%";
+    if(performance.now()-last>60){last=performance.now();let pk=0;for(let i=0;i<c.length;i+=4)pk=Math.max(pk,Math.abs(c[i]));wave.push(pk);if(wave.length>200)wave.shift();drawWave()}
+    if(s>=dur)res()}});
+  closeMic(m);const x=new Float32Array(got);let o=0;for(const c of chunks){x.set(c,o);o+=c.length}
+  $("#rLive").hidden=true;wave.length=0;
+  try{applyImpulse(x,m.sr,msg,m.dev)}catch(e){msg.className="msg err";msg.textContent=e.message}
+  setBusy(false);update()}
+const wave=[];
+function drawWave(){const o=cv("#rWave");if(!o)return;const{g,w,h}=o;g.fillStyle=col("--accent");const bw=w/200;wave.forEach((v,i)=>{const hh=Math.max(1,Math.min(1,v*3)*(h/2));g.fillRect(i*bw,h/2-hh,Math.max(1,bw-.5),hh*2)})}
+async function fileNoise(f){if(!f||busy)return;const msg=$("#nMsg");msg.className="msg";msg.textContent="Analizando…";setBusy(true);
+  try{const{x,sr}=await decodeFile(f);applyNoise(x,sr,msg)}catch(e){msg.className="msg err";msg.textContent=e.message&&!/decode/i.test(e.message)?e.message:"No se pudo leer ese archivo de audio."}
+  setBusy(false);update()}
+async function fileImpulse(f){if(!f||busy)return;const msg=$("#rMsg");msg.className="msg";msg.textContent="Analizando…";setBusy(true);
+  try{const{x,sr}=await decodeFile(f);applyImpulse(x,sr,msg)}catch(e){msg.className="msg err";msg.textContent=e.message&&!/decode/i.test(e.message)?e.message:"No se pudo leer ese archivo de audio."}
+  setBusy(false);update()}
+
+
+/* ============ medición automática ============ */
+function recordFor(m,sec,tick){return new Promise(res=>{const chunks=[];let got=0;m.proc.onaudioprocess=ev=>{const d=ev.inputBuffer.getChannelData(0),c=new Float32Array(d.length);c.set(d);chunks.push(c);got+=c.length;const s=got/m.sr;if(tick)tick(s,c);
+  if(s>=sec){m.proc.onaudioprocess=null;const x=new Float32Array(got);let o=0;for(const k of chunks){x.set(k,o);o+=k.length}res(x)}}})}
+async function autoMeasure(){
+  if(busy)return;const msg=$("#aMsg");msg.className="msg";msg.textContent="Pidiendo acceso al micrófono…";let m;
+  try{m=await openMic()}catch(e){micError(e,msg);msg.textContent+=" También puedes grabar una nota de voz (15 s de silencio, un aplauso, 6 s de silencio) y subirla con el botón de al lado.";return}
+  setBusy(true);const live=$("#aLive"),ph=$("#aPhase"),val=$("#aVal"),unit=$("#aUnit"),bar=$("#aBar"),N=16384,ring=new Float32Array(N);let last=0,ok=false;
+  live.hidden=false;msg.textContent="";S.takes=[];S.tex=false;
+  try{
+    ph.textContent="1 de 2 · Silencio. No te muevas ni hables.";unit.textContent="dB(A)";
+    const xn=await recordFor(m,15,(s,c)=>{ring.copyWithin(0,c.length);ring.set(c.subarray(Math.max(0,c.length-N)),N-Math.min(c.length,N));bar.style.width=(s/15*100)+"%";
+      if(s*m.sr>=N&&performance.now()-last>200){last=performance.now();val.textContent=f1(db10(frameSpec(ring,0,N,m.sr).a)+calFor(m.dev))}});
+    applyNoise(xn,m.sr,msg,m.dev);
+    for(let tr=1;tr<=3&&!ok;tr++){
+      ph.textContent=tr===1?"2 de 2 · ¡Aplaude fuerte una vez ahora! Luego quédate en silencio.":"No se oyó bien. Aplaude otra vez, más fuerte.";unit.textContent="s";bar.style.width="0%";
+      try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}
+      const xi=await recordFor(m,8,s=>{val.textContent=Math.max(0,Math.ceil(8-s));bar.style.width=(s/8*100)+"%"});
+      try{applyImpulse(xi,m.sr,msg,m.dev);ok=true}catch(e){msg.className="msg err";msg.textContent=e.message}}
+  }catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo completar la medición."}
+  finally{closeMic(m);live.hidden=true;setBusy(false)}
+  update();
+  if(ok){msg.className="msg";msg.textContent="Medición completa. Tu puntuación y tu plan están abajo."}
+  else if(S.noise&&!S.nex){msg.className="msg err";msg.textContent="Se midió el ruido, pero no se oyó el aplauso. Puedes repetir el eco en Medir por separado."}
+  $("#sum").scrollIntoView({behavior:"smooth",block:"start"})}
+async function autoFile(f){if(!f||busy)return;const msg=$("#aMsg");msg.className="msg";msg.textContent="Analizando…";setBusy(true);
+  try{const{x,sr}=await decodeFile(f);const a=analyzeImpulse(x,sr);a.dev=FILEKEY;S.takes=[a];S.tex=false;
+    const seg=x.subarray(0,Math.max(0,Math.round((a.at-.4)*sr)));let note="";
+    if(seg.length>=3*sr){applyNoise(seg,sr,msg)}else note=" Antes del aplauso hay menos de 3 s de silencio, así que no se midió el ruido de fondo.";
+    msg.className="msg";msg.textContent="Listo. Tu puntuación y tu plan están abajo."+note+(a.clipped?" El aplauso saturó el micrófono.":"")}
+  catch(e){msg.className="msg err";msg.textContent=e.message&&!/decode/i.test(e.message)?e.message:"No se pudo leer ese archivo de audio."}
+  setBusy(false);update();$("#sum").scrollIntoView({behavior:"smooth",block:"start"})}
+
+/* ============ calibración, avisos y micrófono externo ============ */
+const fdate=ts=>{try{return new Date(ts).toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"numeric"})}catch(e){return""}};
+function calInfo(){const m=S.noise;if(!m)return{kind:"none"};if(m.example||S.nex)return{kind:"ex"};const c=S.calMap[m.dev];return c?{kind:"ok",c,dev:m.dev}:{kind:"no",dev:m.dev}}
+function calTarget(){return S.noise&&!S.nex?S.noise:null}
+function calBanner(){
+  const ci=calInfo();let h="";
+  if(ci.kind==="no")h=`<div class="calb w"><b>Los decibelios están sin calibrar</b>Medido con: ${esc(ci.dev)}. El nivel puede errar de ±5 a ±10 dB. <u>Dependen de la calibración:</u> ruido en dB(A), NC y la parte de ruido de la puntuación. <u>No dependen:</u> tiempo de eco, claridad (C50 y D50), modos de sala y, con el mismo micrófono, el aislamiento. <u>Lo mejor:</u> medir el mismo ruido con un sonómetro y ajustar aquí la lectura.<div class="btns"><button class="btn sm" type="button" data-act="calnow">Calibrar ahora</button></div><div class="ibrow"><span class="note" style="margin:0">¿Por qué importa?</span>${ib("calw")}</div></div>`;
+  else if(ci.kind==="ok")h=`<div class="calb g"><b>Micrófono calibrado</b>${esc(ci.dev)} · ${ci.c.man?"ajustado a mano":"con sonómetro"}${ci.c.ts?", "+fdate(ci.c.ts):""}. Vale mientras uses el mismo micrófono y la misma ganancia de entrada.<div class="ibrow"><span class="note" style="margin:0">Más información</span>${ib("calw")}</div></div>`;
+  else if(ci.kind==="ex")h=`<div class="calb"><b>Datos de ejemplo</b>Los números de ruido son ilustrativos. Mide tu espacio para ver los tuyos.<div class="ibrow"><span class="note" style="margin:0">¿Qué depende de la calibración?</span>${ib("calw")}</div></div>`;
+  return h+`<div class="disc ibrow"><span><b>Medición orientativa.</b> No sustituye una medición profesional.</span>${ib("disc")}</div>`}
+function renderCal(){
+  const m=calTarget(),st=$("#calSt"),inp=$("#cal"),go=$("#calGo");if(!st)return;
+  if(!m){st.className="calb";st.innerHTML="<b>Aún sin medición propia</b>Mide el ruido con tu micrófono (o sube una grabación) y aquí podrás calibrarlo contra un sonómetro.";inp.disabled=true;go.disabled=true;if(document.activeElement!==inp)inp.value="";return}
+  inp.disabled=false;go.disabled=false;const c=S.calMap[m.dev];
+  st.className="calb "+(c?"g":"w");
+  st.innerHTML=`<b>${esc(m.dev)}</b>`+(c?`${c.man?"Ajustado a mano":"Calibrado con sonómetro"}${c.ts?" el "+fdate(c.ts):""}: compensación ${f1(c.off)} dB.`:"Sin calibrar: el nivel puede variar de ±5 a ±10 dB.");
+  if(document.activeElement!==inp)inp.value=c?c.off:100}
+async function scanMics(ask){
+  const msg=$("#micMsg");if(!msg)return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.enumerateDevices){msg.className="msg err";msg.textContent="Este navegador no permite elegir micrófono. Se usará el predeterminado del sistema.";return}
+  try{
+    if(ask){const st=await navigator.mediaDevices.getUserMedia({audio:true});st.getTracks().forEach(t=>t.stop())}
+    const all=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="audioinput");
+    let list=all.filter(d=>d.deviceId!=="default"&&d.deviceId!=="communications");if(!list.length)list=all;
+    S.devs=list.map((d,i)=>({id:d.deviceId,label:d.label||("Micrófono "+(i+1)),named:!!d.label}))
+  }catch(e){msg.className="msg err";msg.textContent=(e&&(e.name==="NotAllowedError"||e.name==="SecurityError"))?"No se pudo acceder al micrófono (permiso o vista sin micrófono). Concede el permiso y pulsa Buscar otra vez.":"No se pudo buscar micrófonos: "+(e&&e.message?e.message:"error");return}
+  paintMics()}
+const isExt=l=>/usb|extern|headset|interface|line/i.test(l);
+function paintMics(){
+  const sel=$("#micSel"),msg=$("#micMsg");
+  sel.innerHTML='<option value="">Predeterminado del sistema</option>'+S.devs.map(d=>`<option value="${esc(d.id)}">${esc(d.label)}${isExt(d.label)?" · externo":""}</option>`).join("");
+  const cur=S.devs.find(d=>d.id&&d.id===S.devId)||S.devs.find(d=>S.devLabel&&d.label===S.devLabel);
+  S.devId=cur?cur.id:"";sel.value=S.devId;msg.className="msg";
+  const named=S.devs.filter(d=>d.named);
+  if(S.devs.length&&!named.length)msg.textContent="Pulsa Buscar y permite el micrófono para ver los nombres.";
+  else if(S.devs.length>1)msg.textContent="Se encontraron "+S.devs.length+" micrófonos. Si conectaste el USB-C, elígelo en la lista.";
+  else msg.textContent="Solo aparece el micrófono del dispositivo. Conecta el micrófono por USB-C y pulsa Buscar de nuevo."}
+
+/* ============ barrido y deconvolución ============ */
+const pow2=n=>{let k=1;while(k<n)k<<=1;return k};
+function makeSweep(sr,dur){dur=dur||6;const f1_=60,f2_=Math.min(16000,.45*sr),L=Math.log(f2_/f1_),n=Math.round(dur*sr),x=new Float32Array(n),fd=Math.round(.02*sr);
+  for(let i=0;i<n;i++){const t=i/sr;let v=Math.sin(2*Math.PI*f1_*dur/L*(Math.exp(t/dur*L)-1));if(i<fd)v*=i/fd;else if(i>n-fd)v*=(n-i)/fd;x[i]=.8*v}return x}
+function fftConv(a,b){const N=pow2(a.length+b.length-1),ar=new Float64Array(N),ai=new Float64Array(N),br=new Float64Array(N),bi=new Float64Array(N);
+  ar.set(a);br.set(b);fft(ar,ai);fft(br,bi);
+  for(let k=0;k<N;k++){const r=ar[k]*br[k]-ai[k]*bi[k],i=ar[k]*bi[k]+ai[k]*br[k];ar[k]=r;ai[k]=-i}
+  fft(ar,ai);const o=new Float32Array(a.length+b.length-1);for(let i=0;i<o.length;i++)o[i]=ar[i]/N;return o}
+function deconv(y,xs){const N=pow2(y.length+xs.length),yr=new Float64Array(N),yi=new Float64Array(N),xr=new Float64Array(N),xi=new Float64Array(N);
+  yr.set(y);xr.set(xs);fft(yr,yi);fft(xr,xi);let mx=0;for(let k=0;k<N;k++){const p=xr[k]*xr[k]+xi[k]*xi[k];if(p>mx)mx=p}const eps=1e-4*mx;
+  for(let k=0;k<N;k++){const d=xr[k]*xr[k]+xi[k]*xi[k]+eps,hr=(yr[k]*xr[k]+yi[k]*xi[k])/d,hi=(yi[k]*xr[k]-yr[k]*xi[k])/d;yr[k]=hr;yi[k]=-hi}
+  fft(yr,yi);const o=new Float32Array(y.length);for(let i=0;i<o.length;i++)o[i]=yr[i]/N;return o}
+async function measureSweep(){
+  if(busy)return;const msg=$("#swMsg");msg.className="msg";msg.textContent="Pidiendo acceso al micrófono…";let m;
+  try{m=await openMic()}catch(e){micError(e,msg);return}
+  setBusy(true);const live=$("#swLive"),val=$("#swVal"),bar=$("#swBar");live.hidden=false;let ok=false;
+  try{
+    const sweep=makeSweep(m.sr),pre=.5,dur=pre+sweep.length/m.sr+3.5;
+    const buf=m.ctx.createBuffer(1,sweep.length,m.sr);buf.copyToChannel(sweep,0);const src=m.ctx.createBufferSource();src.buffer=buf;src.connect(m.ctx.destination);
+    msg.textContent="Va a sonar un barrido de 6 s. Quédate en silencio.";
+    const pr=recordFor(m,dur,s=>{val.textContent=Math.max(0,Math.ceil(dur-s));bar.style.width=(s/dur*100)+"%"});
+    src.start(m.ctx.currentTime+pre);const y=await pr;
+    let pk=0;for(let i=0;i<y.length;i+=7)pk=Math.max(pk,Math.abs(y[i]));
+    {const w0=Math.round(.4*m.sr),w1=Math.round(.5*m.sr),w2=Math.round((pre+3)*m.sr);let e0=0,e1=0;for(let i=0;i<w0;i++)e0+=y[i]*y[i];for(let i=w1;i<w2&&i<y.length;i++)e1+=y[i]*y[i];e0/=w0;e1/=Math.max(1,w2-w1);if(10*Math.log10((e1+1e-18)/(e0+1e-18))<10)throw new Error("aplauso: no se oyó el barrido")}
+    const h=deconv(y,sweep),a=analyzeImpulse(h,m.sr);a.dev=m.dev;a.sweep=true;a.clipped=pk>=.99;
+    if(S.tex){S.takes=[];S.tex=false}S.takes.push(a);ok=true;
+    msg.className="msg";msg.textContent="Toma "+S.takes.length+" lista (barrido)."+(a.clipped?" El micrófono saturó: baja el volumen o aleja el teléfono.":"")}
+  catch(e){msg.className="msg err";msg.textContent=/aplauso/i.test(e.message||"")?"No se oyó el barrido con suficiente claridad. Sube el volumen, acerca el teléfono a la bocina y reduce el ruido.":(e.message||"No se pudo completar el barrido.")}
+  finally{closeMic(m);live.hidden=true;setBusy(false)}
+  update()}
+
+/* ============ aislamiento entre cuartos ============ */
+const ISO_T={dorm:45,sala:40,ofic:40,reun:45,aula:40,estu:50,cine:50,musi:50,rest:30},ISO_B=[125,250,500,1000,2000,4000];
+function isoCalc(I){if(!I||!I.emit||!I.rcv)return null;
+  const rows=ISO_B.map((f,i)=>{const k=i+1,e=I.emit[k];let r=I.rcv[k],lim=false;
+    if(I.bg){const d=r-I.bg[k];if(d<6)lim=true;else if(d<10)r=db10(Math.pow(10,r/10)-Math.pow(10,I.bg[k]/10))}
+    return{f,D:e-r,lim}});
+  const mid=rows.filter(x=>x.f>=500&&x.f<=2000),D=mid.reduce((a,x)=>a+x.D,0)/mid.length;
+  return{rows,D,lim:mid.some(x=>x.lim),nobg:!I.bg,sameDev:I.devE===I.devR}}
+function isoTile(ev){const I=isoCalc(S.iso);if(!I)return"";const tg=ISO_T[S.use],st=I.D>=tg?["good","Cumple"]:I.D>=tg-8?["warn","Cerca"]:["bad","Insuficiente"];
+  return`<div class="tile"><div class="lab ibrow"><span>Aislamiento${ib("iso")}</span><span class="pill ${st[0]}">${st[1]}</span></div><div class="val num">${I.lim?"≥ ":""}${f1(I.D)}<small>dB</small></div><p>Entre los dos cuartos (500 Hz a 2 kHz). Para ${esc(ev.u.n.toLowerCase())} conviene ${tg} dB o más.</p></div>`}
+function renderIso(){const el=$("#isoOut");if(!el)return;const I=S.iso,c=isoCalc(I);
+  let h=`<p class="note">${I&&I.emit?"✓ Emisor":"· Falta emisor"} · ${I&&I.rcv?"✓ Receptor":"· Falta receptor"} · ${I&&I.bg?"✓ Fondo":"· Fondo sin medir (opcional)"}</p>`;
+  if(c){h+=`<div class="scroll"><table class="tbl"><tr><th>Banda (Hz)</th>${c.rows.map(r=>`<th>${r.f}</th>`).join("")}</tr><tr><td>D (dB)</td>${c.rows.map(r=>`<td class="num">${r.lim?"≥":""}${f1(r.D)}</td>`).join("")}</tr></table></div>`;
+    h+=`<p class="note"><b>D ≈ ${c.lim?"≥ ":""}${f1(c.D)} dB</b> (objetivo ≥ ${ISO_T[S.use]}).${c.lim?" El ruido de fondo del receptor limita la medición: el aislamiento real es al menos ese valor.":""}${c.nobg?" Sin el fondo del receptor no se puede comprobar si el ruido ambiente falsea el resultado.":""}${c.sameDev?"":" Usaste micrófonos distintos: la diferencia no es confiable."}</p>`}
+  el.innerHTML=h}
+async function isoMeasure(which){
+  const msg=$("#isMsg");if(busy)return;msg.className="msg";msg.textContent="Pidiendo acceso al micrófono…";let m;
+  try{m=await openMic()}catch(e){micError(e,msg);return}
+  setBusy(true);let res=null;const lab={emit:"Midiendo el cuarto emisor…",rcv:"Midiendo el receptor…",bg:"Midiendo el fondo del receptor (fuente apagada)…"}[which];
+  try{const x=await recordFor(m,12,s=>{msg.textContent=lab+" "+Math.max(0,Math.ceil(12-s))+" s"});const a=analyzeNoise(x,m.sr);res={oct:a.oct,dev:m.dev,clipped:a.clipped}}
+  catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo medir."}
+  finally{closeMic(m);setBusy(false)}
+  if(res){S.iso=S.iso||{};if(which==="emit"){S.iso.emit=res.oct;S.iso.devE=res.dev}else if(which==="rcv"){S.iso.rcv=res.oct;S.iso.devR=res.dev}else S.iso.bg=res.oct;
+    msg.className="msg";msg.textContent="Listo."+(res.clipped?" Saturó el micrófono: baja el volumen de la fuente o aleja el teléfono.":"")}
+  update()}
+
+/* ============ problema / ideal / solución ============ */
+const RTP={dorm:"El cuarto rebota los sonidos: cualquier ruido suena más fuerte y cuesta relajarse y dormir.",sala:"La TV y las conversaciones se oyen confusas y terminas subiendo el volumen.",ofic:"Se oyen más las conversaciones de los demás y cuesta concentrarse.",reun:"Cuesta entender a quien habla, sobre todo en videollamadas, y la gente pide repetir.",aula:"Los alumnos del fondo no entienden bien al docente y el grupo se cansa.",estu:"Las grabaciones captan el eco del cuarto y suenan lejanas; después es muy difícil quitarlo al editar.",cine:"Los diálogos pierden claridad y los efectos se emborronan.",musi:"Los instrumentos se mezclan y se pierde el detalle.",rest:"Hay que hablar más fuerte para conversar y el ruido general sube."};
+const NZP={dorm:"Este ruido dificulta conciliar el sueño y puede despertarte.",sala:"Terminas subiendo el volumen de la TV y la música, y las conversaciones cansan.",ofic:"Baja la concentración y la gente levanta la voz.",reun:"Tapa las palabras suaves y el micrófono lo graba en las videollamadas.",aula:"Los alumnos del fondo pierden palabras.",estu:"El ruido queda grabado en cada toma y no se quita del todo después.",cine:"Tapa los pasajes suaves y los diálogos bajos.",musi:"Tapa los matices suaves de la música.",rest:"La gente sube la voz y todo se vuelve más ruidoso."};
+function absNeed(ev){const V=Vol(),T=ev.T,[lo,hi]=ev.u.rt,tgt=(lo+hi)/2;if(!V||!(T>hi))return null;const dA=.161*V*(1/tgt-1/T);return{dA,n:Math.max(1,Math.ceil(dA/.61)),tgt}}
+function pisFor(x,ev){
+  const u=ev.u,use=u.n.toLowerCase(),[lo,hi]=u.rt,T=ev.T,tgt=(lo+hi)/2,pj=projection(ev),gain=pj?` Puntuación esperada: de ${ev.score} a unos ${pj.sc}.`:"";
+  switch(x.id){
+  case"rt":{const a=absNeed(ev);return{p:RTP[S.use],ideal:`Un eco de ${f2(lo)} a ${f2(hi)} s: la voz se entiende sin esfuerzo y el sonido es natural.`,sol:(a?`Agregar unos ${a.n} paneles de 60 × 120 cm, más cortinas gruesas y alfombra, para bajar el eco de ${f2(T)} a cerca de ${f2(tgt)} s.`:`Agregar paneles, cortinas y alfombra para bajar el eco de ${f2(T)} a cerca de ${f2(tgt)} s. Escribe las medidas del cuarto y calculamos cuántos paneles.`)+gain}}
+  case"rtlow":return{p:"La voz suena opaca y sin cuerpo; hablar o tocar se siente apagado.",ideal:`Un eco de ${f2(lo)} a ${f2(hi)} s, con algo de vida.`,sol:`Quitar parte de la absorción y agregar superficies que dispersen (libreros irregulares, plantas, madera ranurada) hasta subir de ${f2(T)} a ${f2(lo)} s o más.`+gain}
+  case"bass":return{p:"Los graves retumban y se alargan: las voces graves suenan \"cargadas\" y la música pierde definición.",ideal:"Graves que se apagan a la par que los medios.",sol:"Instalar trampas de graves de 10 a 20 cm en las esquinas (empezando por las del frente) y despegar sillones y escritorios de la pared del fondo."}
+  case"bright":return{p:"El sonido es áspero: las eses silban y los platos o teclas cansan el oído.",ideal:"Agudos que se apagan con naturalidad, sin brillo molesto.",sol:"Cortinas, tapetes y paneles de tela; cubrir los vidrios grandes."}
+  case"c50":return{p:"Aunque haya volumen suficiente, las palabras se pegan unas con otras y hay que pedir que repitan.",ideal:"C50 de 0 dB o más: las sílabas llegan separadas.",sol:"Paneles en los primeros puntos de reflexión (muros laterales y techo, entre quien habla y quien escucha) y el micrófono más cerca de quien habla."}
+  case"nz":return{p:NZP[S.use],ideal:`Ruido de ${u.noise[0]} dB(A) o menos en ${use}.`,sol:`Encontrar la fuente apagando equipos uno por uno, sellar puertas y ventanas y poner bases elásticas bajo lo que vibra. Meta: bajar de ${f1(ev.L)} a ${u.noise[0]} dB(A).`+(ev.L>u.noise[0]?` Bajar 3 dB ya se nota; 10 dB se oye como la mitad.`:"")}
+  case"nlf":return{p:"Es un ruido grave que atraviesa paredes y se siente como un zumbido en el pecho o el piso.",ideal:"Sin componentes graves dominantes.",sol:"Bases elásticas bajo motores, silenciadores en ductos y, si viene de fuera, masa en el muro (doble tablaroca), no espuma."}
+  case"nhf":return{p:"Voces, tráfico y bocinas entran por las rendijas: se oyen detalles de lo que pasa afuera.",ideal:"Puertas y ventanas selladas que no dejan pasar el sonido medio y agudo.",sol:"Burlete en marcos, barredor bajo la puerta, cortinas pesadas y silicón en pasos de cables y tubos."}
+  case"nvar":return{p:"Los ruidos que aparecen de golpe despiertan o distraen más que uno parejo del mismo nivel.",ideal:"Poca diferencia entre los momentos más fuertes y los más tranquilos.",sol:"Reforzar primero el aislamiento de ventanas y puertas; un sonido suave y parejo de fondo reduce el contraste."}
+  case"tone":return{p:"Un zumbido constante cansa aunque su nivel sea bajo, porque el oído lo distingue del resto.",ideal:"Espectro parejo, sin una banda que sobresalga.",sol:"Apagar equipos uno a uno hasta hallar el origen; moverlo, ponerle base elástica o cambiarlo. Si es de la instalación, revisión eléctrica."}
+  case"flut":return{p:"Cada palabra fuerte deja un \"tin-tin-tin\" rápido que ensucia la voz y la música.",ideal:"Decaimiento suave, sin repeticiones.",sol:"Absorción en una de las dos paredes paralelas, o romper el paralelismo con un librero irregular o paneles difusores."}
+  case"iso":return{p:"Lo que pasa en el otro cuarto se oye: voces, música y golpes se cuelan.",ideal:`Al menos ${ISO_T[S.use]} dB de diferencia entre los cuartos para ${use}.`,sol:"Sellar rendijas y la puerta, agregar masa en el muro compartido (doble tablaroca con sellador) y desacoplar si el ruido es grave. La espuma no aísla."}
+  }return{}}
+function pisHTML(x){if(!x.p)return`<p>${esc(x.d)}</p>`;
+  return`<div class="pis"><div class="m"><b>Medido</b><p>${esc(x.d)}</p></div><div class="p"><b>Problema</b><p>${esc(x.p)}</p></div><div class="i"><b>Lo ideal</b><p>${esc(x.ideal)}</p></div><div class="s"><b>Solución</b><p>${esc(x.sol)}</p></div></div>`}
+
+/* ============ lista de compras ============ */
+function shopItems(ev){
+  const ids=new Set(CURRECS.map(r=>r.id)),it=[];
+  if(ids.has("rt")){const a=absNeed(ev);it.push({n:a?`${a.n} paneles absorbentes de 60 × 120 cm y 5 cm de lana mineral o poliéster`:"Paneles absorbentes de 60 × 120 cm y 5 cm de espesor (pon las medidas del cuarto para saber cuántos)",c:3,w:"Muros laterales a la altura de la cabeza y pared del fondo"},{n:"1 juego de cortinas gruesas con pliegues que cubra toda la ventana",c:2,w:"Reduce reflejos del vidrio"},{n:"Alfombra gruesa con bajo-alfombra",c:2,w:"Sobre todo si el piso es de loseta o madera"})}
+  if(ids.has("rtlow"))it.push({n:"Librero irregular, plantas grandes o paneles de madera ranurada",c:2,w:"Para dispersar sin absorber"});
+  if(ids.has("bass"))it.push({n:"4 trampas de graves de esquina, de 10 a 20 cm, con lana mineral de 60 kg/m³ o más",c:3,w:"Esquinas verticales, primero las del frente"});
+  if(ids.has("nhf")||ids.has("iso"))it.push({n:"Burlete autoadherible (unos 5 m por puerta y 4 a 5 m por ventana)",c:1},{n:"Barredor o felpa de puerta, 1 por puerta",c:1},{n:"Sellador de silicón, 1 cartucho",c:1,w:"Cajas eléctricas, pasos de tubo y marcos"});
+  if(ids.has("nlf")||ids.has("tone"))it.push({n:"Bases antivibración de goma, 4 por equipo",c:1,w:"Bajo ventilador, refrigerador, compresor o lo que zumba"});
+  if(ids.has("iso"))it.push({n:"Placas de tablaroca para una segunda capa en el muro compartido, con sellador acústico",c:3,w:"Obra: conviene que lo haga un instalador"});
+  if(ids.has("flut"))it.push({n:"1 o 2 paneles extra o un librero irregular",c:2,w:"En una de las dos paredes paralelas"});
+  if(S.use==="aula")it.push({n:"Fieltro adhesivo para las patas de sillas y mesas",c:1});
+  return it}
+function renderShop(ev){
+  const el=$("#shop"),it=shopItems(ev);if(!el)return;
+  if(!it.length){el.hidden=true;el.innerHTML="";return}
+  el.hidden=false;
+  el.innerHTML=`<h2>Lista de compras</h2><p class="lead">Lo que necesitas para aplicar tu plan. Cantidades aproximadas: verifica con las medidas reales.</p><ul>${it.map(x=>`<li><span>${esc(x.n)}</span><span class="c">${costTxt[x.c]}</span>${x.w?`<small>${esc(x.w)}</small>`:""}</li>`).join("")}</ul><div class="btns"><button class="btn sm" type="button" id="shopCopy">Copiar lista</button></div><p class="msg" id="shopMsg"></p><p class="note">Sin precios: cambian según la tienda y la ciudad. Cotiza en dos o tres lugares.</p>`;
+  $("#shopCopy").onclick=async()=>{const t="Lista de compras · Polaris Acústica\n"+it.map(x=>"- "+x.n+(x.w?" ("+x.w+")":"")).join("\n"),m=$("#shopMsg");try{await navigator.clipboard.writeText(t);m.textContent="Lista copiada."}catch(e){m.textContent="No se pudo copiar automáticamente."}}}
+
+/* ============ escucha la diferencia (auralización) ============ */
+const LIS={ctx:null,src:null,dry:null};
+function synthIR(Tm,sr,len){
+  const n=Math.round(len*sr),y=new Float64Array(n),r=rng(23),pre=Math.round(.008*sr);
+  for(const fc of [63,125,250,500,1000,2000,4000,8000]){if(fc*Math.SQRT2>=sr/2)continue;const T=Tm[fc];if(!T)continue;
+    const w=new Float64Array(n);for(let i=0;i<n;i++)w[i]=r()*2-1;const bp=bandpass(w,fc,sr);
+    let e=0;const m=Math.round(.05*sr);for(let i=pre;i<pre+m;i++)e+=bp[i]*bp[i];const g=1/Math.sqrt(e/m);
+    for(let i=pre;i<n;i++)y[i]+=bp[i]*g*Math.exp(-6.9078*((i-pre)/sr)/T)}
+  let er=0;for(let i=0;i<n;i++)er+=y[i]*y[i];y[0]+=Math.sqrt(.5*er);
+  return y}
+function lisTmap(ev,kind){
+  const R=ev.R,[lo,hi]=ev.u.rt,m={};for(const fc of RTB){const b=R.bands[fc];m[fc]=(b&&b.t)||ev.T}
+  m[63]=m[125];m[8000]=(m[4000]||ev.T)*.8;
+  if(kind==="aft")for(const k of Object.keys(m)){const f=+k,cap=hi*(f<=250?1.25:1),T=m[k];m[k]=T>cap?cap:T<lo?lo:T}
+  return m}
+function synthVoice(sr){
+  const n=Math.round(4.5*sr),x=new Float32Array(n),V=[[700,1200,2600],[400,2000,2700],[300,800,2500],[550,1800,2500],[700,1200,2600],[400,2000,2700]];
+  let ph=0;const syl=.62;
+  for(let i=0;i<n;i++){const t=i/sr,si=Math.min(V.length-1,Math.floor(t/syl)),tt=t-si*syl;if(tt>.5)continue;
+    const env=Math.min(1,tt/.04)*Math.min(1,(.5-tt)/.12),f0=115+14*Math.sin(2*Math.PI*.7*t)+8*si/V.length*5;ph+=2*Math.PI*f0/sr;
+    let v=0;for(let h=1;h<=32;h++){const fh=h*f0;if(fh>5000)break;let a=0;for(let j=0;j<3;j++){const d=(fh-V[si][j])/(90+60*j);a+=1/(1+d*d)}v+=a*Math.sin(h*ph)/Math.sqrt(h)}
+    x[i]=v*env*.05}
+  let pk=0;for(let i=0;i<n;i++)pk=Math.max(pk,Math.abs(x[i]));for(let i=0;i<n;i++)x[i]*=.5/pk;return x}
+function lisStop(){try{if(LIS.src){LIS.src.onended=null;LIS.src.stop()}}catch(e){}LIS.src=null}
+function lisRender(kind){
+  const ev=CURV,{x,sr}=LIS.dry;if(kind==="dry")return x;
+  const Tm=lisTmap(ev,kind),mx=Math.max(...Object.values(Tm)),ir=synthIR(Tm,sr,Math.min(4,mx*1.1+.1)),y=fftConv(x,ir);
+  let a=0,b=0;for(let i=0;i<x.length;i++){a+=x[i]*x[i];b+=y[i]*y[i]}const g=Math.sqrt(a/Math.max(b,1e-20));let pk=0;for(let i=0;i<y.length;i++){y[i]*=g;pk=Math.max(pk,Math.abs(y[i]))}
+  if(pk>.95){const k=.95/pk;for(let i=0;i<y.length;i++)y[i]*=k}return y}
+function lisPlay(kind){
+  const msg=$("#lisMsg");lisStop();if(!CURV||!CURV.R)return;
+  try{if(!LIS.dry)LIS.dry={x:synthVoice(32000),sr:32000,name:"voz sintética de ejemplo"};
+    const y=lisRender(kind),sr=LIS.dry.sr,AC=window.AudioContext||window.webkitAudioContext;LIS.ctx=LIS.ctx||new AC();LIS.ctx.resume();
+    const b=LIS.ctx.createBuffer(1,y.length,sr);b.copyToChannel(y,0);const s=LIS.ctx.createBufferSource();s.buffer=b;s.connect(LIS.ctx.destination);s.onended=()=>{msg.textContent=""};s.start();LIS.src=s;
+    msg.className="msg";msg.textContent="Reproduciendo "+({dry:"sin cuarto",now:"tu cuarto ahora",aft:"tu cuarto con el plan"}[kind])+" · "+LIS.dry.name+"."}
+  catch(e){msg.className="msg err";msg.textContent="No se pudo reproducir: "+(e.message||"error")}}
+async function lisRecord(){
+  if(busy)return;const msg=$("#lisMsg");msg.className="msg";msg.textContent="Pidiendo acceso al micrófono…";let m;
+  try{m=await openMic()}catch(e){micError(e,msg);return}
+  setBusy(true);try{msg.textContent="Habla con normalidad durante 5 s…";const x=await recordFor(m,5);let pk=0;for(let i=0;i<x.length;i++)pk=Math.max(pk,Math.abs(x[i]));if(pk<.005)throw new Error("Casi no se oyó nada. Acércate al micrófono.");const k=.5/pk;for(let i=0;i<x.length;i++)x[i]*=k;LIS.dry={x,sr:m.sr,name:"tu voz"};msg.textContent="Voz grabada. Pulsa Seco, Ahora o Después."}
+  catch(e){msg.className="msg err";msg.textContent=e.message}finally{closeMic(m);setBusy(false)}}
+async function lisFile(f){if(!f)return;const msg=$("#lisMsg");try{const{x,sr}=await decodeFile(f),n=Math.min(x.length,sr*10),y=new Float32Array(n);let pk=0;for(let i=0;i<n;i++){y[i]=x[i];pk=Math.max(pk,Math.abs(y[i]))}if(pk<1e-4)throw new Error("El audio está en silencio.");for(let i=0;i<n;i++)y[i]*=.5/pk;LIS.dry={x:y,sr,name:"tu audio"};msg.className="msg";msg.textContent="Audio cargado (hasta 10 s). Pulsa Seco, Ahora o Después."}catch(e){msg.className="msg err";msg.textContent=e.message&&!/decode/i.test(e.message)?e.message:"No se pudo leer ese audio."}}
+function renderLis(ev){
+  const el=$("#lis");if(!el)return;lisStop();
+  if(!ev.R||!ev.T){el.hidden=true;el.innerHTML="";return}
+  const pj=projection(ev);el.hidden=false;
+  el.innerHTML=`<div class="ibrow" style="display:flex;align-items:center"><h2 style="margin:0">Escucha la diferencia</h2>${ib("listen")}</div><p class="lead">Una voz de prueba pasada por el modelo de tu cuarto: cómo suena ahora y cómo sonaría con el plan aplicado.${S.tex?" (Con datos de ejemplo.)":""}</p>
+  <div class="lisb"><button class="btn" type="button" data-l="dry">Seco</button><button class="btn pri" type="button" data-l="now">Ahora</button><button class="btn" type="button" data-l="aft"${pj?"":" disabled"}>Después</button><button class="btn sm" type="button" data-l="stop">Parar</button></div>
+  ${pj?"":'<p class="note">Tu eco ya está en el rango recomendado, así que no hay "después" que simular.</p>'}
+  <div class="lisb" style="margin-top:8px"><button class="btn sm" type="button" data-l="rec">Grabar mi voz (5 s)</button><label class="btn sm" for="lisFile" style="cursor:pointer">Subir audio</label><input id="lisFile" type="file" accept="audio/*" hidden></div>
+  <p class="msg" id="lisMsg" role="status"></p><p class="note">Es un modelo calculado con los tiempos de eco que mediste, no una grabación del cuarto. Sirve para dar una idea de cuánto cambia, no para prometer un resultado exacto. Se oye mejor con audífonos.</p>`;
+  el.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{const k=b.dataset.l;if(k==="stop"){lisStop();$("#lisMsg").textContent=""}else if(k==="rec")lisRecord();else lisPlay(k)});
+  $("#lisFile").onchange=e=>{lisFile(e.target.files[0]);e.target.value=""}}
+
+/* ============ conexión ============ */
+function update(){const ev=evaluate();CURV=ev;renderSum(ev);renderRecs(ev);renderLis(ev);renderShop(ev);renderDet(ev);renderCal();renderIso();$("#rTakes").hidden=!S.takes.length||S.tex;restoreInfo();drawAll(ev)}
+function paintUses(){$("#uses").innerHTML=Object.entries(USES).map(([k,u])=>`<button type="button" data-u="${k}" aria-pressed="${k===S.use}">${esc(u.n)}</button>`).join("");
+  $("#uses").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.use=b.dataset.u;savePrefs();paintUses();update()})}
+function setMode(m){S.mode=m;document.body.dataset.mode=m;$("#mSimple").setAttribute("aria-pressed",m==="simple");$("#mEng").setAttribute("aria-pressed",m==="eng");savePrefs();if(m==="eng")requestAnimationFrame(()=>drawAll())}
+$("#mSimple").onclick=()=>setMode("simple");$("#mEng").onclick=()=>setMode("eng");
+["dl","dw","dh"].forEach((id,i)=>{const k=["l","w","h"][i],el=$("#"+id);el.value=S.dims[k]||"";el.oninput=()=>{S.dims[k]=parseFloat(el.value)||0;savePrefs();update()}});
+$("#cal").oninput=()=>{const t=calTarget(),v=parseFloat($("#cal").value);if(t&&isFinite(v)){S.calMap[t.dev]={off:v,ts:Date.now(),man:true};savePrefs();update()}};
+$("#calGo").onclick=()=>{const m=$("#calMsg"),t=calTarget(),ref=parseFloat($("#ref").value);if(!t){m.textContent="Primero mide el ruido con tu micrófono o sube una grabación propia.";return}if(!isFinite(ref)){m.textContent="Escribe la lectura (LAeq) de tu sonómetro.";return}
+  const off=Math.round((ref-t.laeq)*2)/2;S.calMap[t.dev]={off,ts:Date.now(),ref};savePrefs();m.textContent="Calibrado "+t.dev+": compensación "+off+" dB. Para comprobar, mide otra vez el mismo ruido y compara con el sonómetro."+(ref<55?" Con menos de 55 dB(A) la calibración es menos confiable: repítela con un ruido más fuerte.":"");update()};
+$("#micScan").onclick=()=>scanMics(true);
+$("#micSel").onchange=()=>{const sel=$("#micSel"),d=S.devs.find(x=>x.id===sel.value);S.devId=sel.value;S.devLabel=d?d.label:"";savePrefs();$("#micMsg").className="msg";$("#micMsg").textContent=d?"Se usará: "+d.label+". Verifica el nombre en el resultado.":"Se usará el micrófono predeterminado."};
+try{navigator.mediaDevices.addEventListener("devicechange",()=>{scanMics(false).then(()=>{const mm=$("#micMsg");mm.textContent="Cambió la lista de micrófonos. "+mm.textContent})})}catch(e){}
+{const cp=async(t,msg)=>{const m=$("#fbMsg");try{await navigator.clipboard.writeText(t);m.textContent=msg}catch(e){m.textContent="No se pudo copiar solo: mantén pulsado "+t+" y cópialo."}};
+$("#fbCopy").onclick=()=>cp("drophlex@gmail.com","Correo copiado.");$("#fbPayCopy").onclick=()=>cp("drophlex@gmail.com","Cuenta de PayPal copiada: drophlex@gmail.com. Gracias.")}
+$("#swGo").onclick=measureSweep;$("#isE").onclick=()=>isoMeasure("emit");$("#isR").onclick=()=>isoMeasure("rcv");$("#isB").onclick=()=>isoMeasure("bg");$("#isC").onclick=()=>{S.iso=null;$("#isMsg").textContent="Medición de aislamiento borrada.";update()};
+$("#aGo").onclick=autoMeasure;$("#aFile").onchange=e=>{autoFile(e.target.files[0]);e.target.value=""};$("#nGo").onclick=measureNoise;$("#rGo").onclick=measureImpulse;
+$("#nFile").onchange=e=>{fileNoise(e.target.files[0]);e.target.value=""};$("#rFile").onchange=e=>{fileImpulse(e.target.files[0]);e.target.value=""};
+$("#rClear").onclick=()=>{S.takes=[];S.tex=false;$("#rMsg").textContent="Tomas borradas.";update()};
+let rz=0;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>drawAll(),150)});
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>drawAll());new MutationObserver(()=>drawAll()).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]})}catch(e){}
+/* inicio con datos de ejemplo */
+S.noise=exampleNoise();S.nex=true;S.takes=[exampleImpulse()];S.tex=true;
+paintUses();setMode(S.mode);update();
+window.__resona={S,analyzeNoise,analyzeImpulse,evaluate,buildRecs,exampleNoise,exampleImpulse,makeSweep,deconv,fftConv,synthIR,lisTmap,isoCalc,calInfo,detectFlutter,bandpass,rng,RTB,reportText,csvText,shopItems,synthVoice};
+</script>
+
+<script>
+if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
+</script>
+</body></html>

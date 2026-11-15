@@ -1,0 +1,17 @@
+name: Propuesta de cambio / quiero modificar el código
+description: Cuéntame qué te gustaría cambiar. Si me convence, te abro la puerta a colaborar.
+labels: [propuesta]
+body:
+  - type: textarea
+    id: cambio
+    attributes: {label: ¿Qué cambio te gustaría?, description: Explica la idea y para qué sirve}
+    validations: {required: true}
+  - type: dropdown
+    id: quiero
+    attributes:
+      label: ¿Quieres programarlo tú?
+      options: ["Sí, quiero acceso para modificar el código", "No, solo sugiero la idea"]
+    validations: {required: true}
+  - type: input
+    id: contacto
+    attributes: {label: Correo o usuario de GitHub para contactarte}

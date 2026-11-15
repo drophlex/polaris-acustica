@@ -1,0 +1,8 @@
+name: Reporte de error
+description: Algo no funciona como esperabas
+labels: [error]
+body:
+  - type: textarea
+    id: que
+    attributes: {label: ¿Qué pasó?, description: Pasos, dispositivo (Android/iPhone/PC) y micrófono usado}
+    validations: {required: true}
