@@ -91,7 +91,7 @@ footer{position:absolute;left:.62in;right:.62in;bottom:.36in;display:flex;justif
 
 def shot(name, cap='', h=None, pos='top'):
     style = f' style="height:{h};object-fit:cover;object-position:{pos}"' if h else ''
-    return f'<figure><div class="shot"><img src="file://{DOCS / name}"{style}></div>' + (f'<figcaption>{cap}</figcaption>' if cap else '') + '</figure>'
+    return f'<figure><div class="shot"><img src="file://{(DOCS / "en" / name) if L == "en" else (DOCS / name)}"{style}></div>' + (f'<figcaption>{cap}</figcaption>' if cap else '') + '</figure>'
 def table(head, rows, center=()):
     return '<table><tr>' + ''.join(f'<th>{h}</th>' for h in head) + '</tr>' + ''.join(
         '<tr>' + ''.join(f'<td class="c">{c}</td>' if j in center else f'<td>{c}</td>' for j, c in enumerate(r)) + '</tr>' for r in rows) + '</table>'
@@ -133,7 +133,7 @@ Instagram <a href="{IG}">@polaris.sound.lab</a> · YouTube <a href="{YT}">@Polar
 <div><b class="m">3</b>{T('si eso es <b>adecuado para lo que haces ahí</b>', 'whether that is <b>right for what you do there</b>')}</div><div><b class="m">4</b>{T('<b>qué hacer, en qué orden y con qué materiales</b>', '<b>what to do, in what order and with which materials</b>')}</div></div>
 <p>{T('Tiene dos modos: <b>Simple</b>, para quien no sabe de acústica, e <b>Ingeniero</b>, con curvas, bandas y métricas. Todo se calcula en tu dispositivo: el audio no se envía a ningún lado.',
       'It has two modes: <b>Simple</b>, for anyone who knows nothing about acoustics, and <b>Engineer</b>, with curves, bands and metrics. Everything is computed on your device: the audio is never sent anywhere.')}</p>
-{'' if L == 'es' else note('The app itself is in Spanish. This manual shows its Spanish screens and gives every label in Spanish with its meaning in English.', 'Language')}
+{note(T('La app viene en inglés: el botón <b>ES</b> de arriba a la derecha la pasa a español (y <b>EN</b> la regresa).', 'The app comes in English: the <b>ES</b> button at the top right switches it to Spanish (and <b>EN</b> switches it back).'), T('Idioma', 'Language'))}
 <h2>{T('¿A quién le sirve?', 'Who is it for?')}</h2>
 {table([T('Si eres…', 'If you are…'), T('Te ayuda a…', 'It helps you…')], who)}
 <h2>{T('Contenido', 'Contents')}</h2><div class="toc">{''.join(f'<div><span>{i + 1:02d}</span>{t}</div>' for i, t in enumerate(toc))}</div>'''))
@@ -146,13 +146,13 @@ Instagram <a href="{IG}">@polaris.sound.lab</a> · YouTube <a href="{YT}">@Polar
 <p>{T('<b>Instálala como app:</b> en iPhone, Safari › Compartir › <i>Agregar a pantalla de inicio</i>. En Android, Chrome › menú › <i>Instalar app</i>. Después de abrirla una vez funciona sin internet.',
       '<b>Install it as an app:</b> on iPhone, Safari › Share › <i>Add to Home Screen</i>. On Android, Chrome › menu › <i>Install app</i>. After opening it once, it works offline.')}</p>
 <h3>{T('Medir', 'Measure')}</h3>
-{steps([T('Cuando pida permiso para el micrófono, pulsa <b>Permitir</b>.', 'When it asks for the microphone, tap <b>Allow</b> (<i>Permitir</i>).'),
+{steps([T('Cuando pida permiso para el micrófono, pulsa <b>Permitir</b>.', 'When it asks for the microphone, tap <b>Allow</b>.'),
         T('Entra al cuarto, cierra la puerta y ponte donde normalmente te sientas o hablas.', 'Go into the room, close the door and stand where you usually sit or talk.'),
         T('En <b>¿Para qué es el espacio?</b> elige el uso: dormitorio, sala, oficina, sala de juntas, aula, estudio o podcast, cine en casa, sala de música o restaurante. Cada uso tiene sus propios objetivos.',
-          'In <b>¿Para qué es el espacio?</b> (what is the room for?) pick the use: bedroom, living room, office, meeting room, classroom, studio or podcast, home theater, music room or restaurant. Each use has its own targets.'),
+          'In <b>What is the room for?</b> pick the use: bedroom, living room, office, meeting room, classroom, studio or podcast, home theater, music room or restaurant. Each use has its own targets.'),
         T('Opcional: escribe <b>largo, ancho y alto</b> en metros para calcular cuánto material necesitas.', 'Optional: type the <b>length, width and height</b> in meters, to work out how much material you need.'),
         T('Pulsa <span class="k">Empezar medición automática</span>. Quédate en silencio unos 15 segundos y, cuando la app lo indique, <b>da un aplauso fuerte</b>.',
-          'Tap <span class="k">Empezar medición automática</span> (start automatic measurement). Stay silent for about 15 seconds and, when the app says so, <b>clap once, loud</b>.'),
+          'Tap <span class="k">Start automatic measurement</span>. Stay silent for about 15 seconds and, when the app says so, <b>clap once, loud</b>.'),
         T('Lee el veredicto y el plan. Empieza por el primer paso: normalmente es lo más barato y lo que más ayuda.', 'Read the verdict and the plan. Start with step one: it is usually the cheapest and the one that helps most.'),
         T('Aplica el cambio, <b>vuelve a medir</b> y compara con la medición anterior.', 'Make the change, <b>measure again</b> and compare with the previous measurement.')])}
 {tip(T('Si el aplauso sale débil o hay ruido, la app te lo dice: repite la medición.', 'If the clap is weak or the room is noisy, the app tells you: just measure again.'))}
@@ -162,7 +162,7 @@ Instagram <a href="{IG}">@polaris.sound.lab</a> · YouTube <a href="{YT}">@Polar
     P.append((T('Leer el resultado', 'Reading the result'), f'''{kick(T('Leer el resultado', 'Reading the result'))}<h1>{T('Un veredicto <i>de 0 a 100</i>', 'A verdict <i>from 0 to 100</i>')}</h1>
 <div class="wt"><div>{shot('01-resultado.png', T('Resultado en modo Simple.', 'Result in Simple mode.'), '6.3in')}</div><div>
 <p>{T('Arriba ves la <b>puntuación</b> y el veredicto para el uso que elegiste (por ejemplo <i>Necesita atención</i>), con una frase que te dice qué hacer primero.',
-      'At the top you see the <b>score</b> and the verdict for the use you picked (for example <i>Necesita atención</i>, needs attention), with one sentence telling you what to do first.')}</p>
+      'At the top you see the <b>score</b> and the verdict for the use you picked (for example <i>Needs attention</i>), with one sentence telling you what to do first.')}</p>
 <h3>{T('Las dos lecturas principales', 'The two main readings')}</h3>
 {table([T('Lectura', 'Reading'), T('Qué te dice', 'What it tells you')],
        [(T('Ruido de fondo', 'Background noise'), T('El sonido que hay cuando "no hay nada": aire acondicionado, tráfico, zumbidos. En dB(A). La barra marca dónde estás y cuál es lo ideal para tu uso.',
@@ -174,7 +174,7 @@ Instagram <a href="{IG}">@polaris.sound.lab</a> · YouTube <a href="{YT}">@Polar
 {table(['dB(A)', T('Se parece a…', 'Sounds like…')], [('30', T('dormitorio muy silencioso de noche', 'a very quiet bedroom at night')), ('40', T('oficina tranquila', 'a quiet office')),
        ('50', T('conversación suave', 'a soft conversation')), ('60', T('conversación normal', 'a normal conversation'))])}
 <p style="font-size:9pt;color:var(--mute)">{T('Cada 10 dB más se oye como el doble de fuerte. Con 3 dB más ya se nota.', 'Every 10 dB more sounds about twice as loud. Just 3 dB more is already noticeable.')}</p>
-{note(T('Si el micrófono no está calibrado, los decibelios llevan el aviso <i>Sin calibrar</i>. El eco y la claridad son confiables aun así.', 'If the microphone is not calibrated, the decibels carry a <i>Sin calibrar</i> (not calibrated) warning. Echo and clarity are reliable anyway.'))}
+{note(T('Si el micrófono no está calibrado, los decibelios llevan el aviso <i>Sin calibrar</i>. El eco y la claridad son confiables aun así.', 'If the microphone is not calibrated, the decibels carry a <i>Not calibrated</i> warning. Echo and clarity are reliable anyway.'))}
 </div></div>'''))
 
     # 5 · plan + shopping list
@@ -199,13 +199,13 @@ Instagram <a href="{IG}">@polaris.sound.lab</a> · YouTube <a href="{YT}">@Polar
 
     # 6 · hear the difference + advanced + engineer
     P.append((T('Escuchar y medir más', 'Listen and measure more'), f'''{kick(T('Escucha la diferencia · medidas avanzadas', 'Hear the difference · advanced measurements'))}<h1>{T('Oye el cambio <i>antes de comprar</i>', 'Hear the change <i>before you buy</i>')}</h1>
-<div class="tw"><div>{shot('04-escucha.png', T('Escucha la diferencia.', 'Hear the difference (<i>Escucha la diferencia</i>).'))}</div><div>
+<div class="tw"><div>{shot('04-escucha.png', T('Escucha la diferencia.', 'Hear the difference.'))}</div><div>
 <p>{T('Una voz de prueba pasa por el modelo de tu cuarto: <b>Seco</b> (sin cuarto), <b>Ahora</b> (como suena hoy) y <b>Después</b> (con el plan aplicado). También puedes <b>grabar tu voz 5 s</b> o <b>subir un audio</b>.',
-      'A test voice goes through a model of your room: <b>Seco</b> (dry, no room), <b>Ahora</b> (now, how it sounds today) and <b>Después</b> (after, with the plan applied). You can also <b>record your voice for 5 s</b> or <b>upload audio</b>.')}</p>
+      'A test voice goes through a model of your room: <b>Dry</b> (no room), <b>Now</b> (how it sounds today) and <b>After</b> (with the plan applied). You can also <b>record your voice for 5 s</b> or <b>upload audio</b>.')}</p>
 {note(T('Es un modelo calculado con los tiempos de eco que mediste, no una grabación del cuarto. Sirve para darte una idea; se oye mejor con audífonos.', 'It is a model built from the echo times you measured, not a recording of the room. It gives you an idea; it sounds best on headphones.'))}
 </div></div>
 <h2>{T('Medidas avanzadas', 'Advanced measurements')}</h2>
-<p>{T('En <b>Medidas avanzadas</b> puedes medir cada cosa por separado o con más precisión:', 'In <b>Medidas avanzadas</b> (advanced measurements) you can measure each thing separately or more precisely:')}</p>
+<p>{T('En <b>Medidas avanzadas</b> puedes medir cada cosa por separado o con más precisión:', 'In <b>Advanced measurements</b> you can measure each thing separately or more precisely:')}</p>
 {table([T('Medida', 'Measurement'), T('Para qué', 'What for')],
        [(T('Solo ruido', 'Noise only'), T('LAeq, LZeq, LA10/50/90, máximos y mínimos, espectro en tercios de octava y curva NC.', 'LAeq, LZeq, LA10/50/90, max and min, third-octave spectrum and NC curve.')),
         (T('Solo aplauso', 'Clap only'), T('El eco por bandas y la claridad sin repetir el silencio.', 'Echo per band and clarity without repeating the silence.')),
@@ -214,12 +214,12 @@ Instagram <a href="{IG}">@polaris.sound.lab</a> · YouTube <a href="{YT}">@Polar
         (T('Subir esa grabación', 'Upload a recording'), T('Analiza un audio que ya grabaste.', 'Analyses audio you already recorded.'))])}
 <h2>{T('Micrófono', 'Microphone')}</h2>
 <p>{T('Funciona con el micrófono del teléfono. Si conectas uno por <b>USB-C</b>, pulsa <b>Buscar micrófonos</b> y elígelo; el resultado dice con qué micrófono se midió.',
-      'It works with the phone microphone. If you plug one in over <b>USB-C</b>, tap <b>Buscar micrófonos</b> (find microphones) and pick it; the result says which microphone was used.')}</p>'''))
+      'It works with the phone microphone. If you plug one in over <b>USB-C</b>, tap <b>Find microphones</b> and pick it; the result says which microphone was used.')}</p>'''))
 
     # 7 · engineer mode + glossary
     P.append((T('Modo Ingeniero', 'Engineer mode'), f'''{kick(T('Modo Ingeniero', 'Engineer mode'))}<h1>{T('Todas las <i>curvas y métricas</i>', 'Every <i>curve and metric</i>')}</h1>
 <div class="wt"><div>{shot('07-ingeniero.png', T('Datos técnicos: niveles, espectro con curva NC y nivel en el tiempo.', 'Technical data: levels, spectrum with NC curve and level over time.'), '7.3in')}</div><div>
-<p>{T('Cambia arriba de <b>Simple</b> a <b>Ingeniero</b> para ver los datos completos.', 'Switch at the top from <b>Simple</b> to <b>Ingeniero</b> (Engineer) to see all the data.')}</p>
+<p>{T('Cambia arriba de <b>Simple</b> a <b>Ingeniero</b> para ver los datos completos.', 'Switch at the top from <b>Simple</b> to <b>Engineer</b> to see all the data.')}</p>
 {table([T('Término', 'Term'), T('Qué significa', 'What it means')],
        [('LAeq', T('Nivel promedio con ponderación A (como oye el oído).', 'Average level, A-weighted (as the ear hears).')),
         ('LZeq', T('Nivel promedio sin ponderar: incluye los graves.', 'Unweighted average level: includes the bass.')),
@@ -242,7 +242,7 @@ Instagram <a href="{IG}">@polaris.sound.lab</a> · YouTube <a href="{YT}">@Polar
 {steps([T('Pon un <b>sonómetro</b> junto al micrófono.', 'Put a <b>sound level meter</b> next to the microphone.'),
         T('Genera un ruido constante de 65 a 80 dB(A): un ventilador o ruido rosa.', 'Make a steady noise of 65 to 80 dB(A): a fan or pink noise.'),
         T('Mide 15 segundos con la app y anota la lectura <b>LAeq</b> del sonómetro.', 'Measure 15 seconds with the app and write down the meter\'s <b>LAeq</b> reading.'),
-        T('En <b>Calibración del micrófono</b>, escribe esa lectura y pulsa <span class="k">Calibrar con la lectura</span>.', 'In <b>Calibración del micrófono</b>, type that reading and tap <span class="k">Calibrar con la lectura</span> (calibrate with the reading).')])}
+        T('En <b>Calibración del micrófono</b>, escribe esa lectura y pulsa <span class="k">Calibrar con la lectura</span>.', 'In <b>Microphone calibration</b>, type that reading and tap <span class="k">Calibrate with the reading</span>.')])}
 <p>{T('Cada micrófono se calibra por separado y la calibración vale mientras no cambies su ganancia.', 'Each microphone is calibrated on its own, and the calibration holds as long as you do not change its gain.')}</p>
 <h3>{T('Dependen de la calibración', 'Depend on calibration')}</h3>
 <p>{T('El ruido en dB(A), la curva NC y la parte de ruido de la puntuación.', 'Noise in dB(A), the NC curve and the noise part of the score.')}</p>
