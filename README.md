@@ -12,6 +12,10 @@
 - **Android (APK de prueba):** descárgalo en [Releases](../../releases). Es una versión de prueba, no de Google Play.
 - **Instalarla como app:** en iPhone, Safari > Compartir > *Agregar a pantalla de inicio*. En Android, Chrome > menú > *Instalar app*.
 
+## Manual
+
+Manual en PDF, con capturas y paso a paso: **[Español](manual/PolarisAcustica-Manual-ES.pdf)** · **[English](manual/PolarisAcustica-Manual-EN.pdf)** · [ambos / both](manual/PolarisAcustica-Manual-EN-ES.pdf). Para regenerarlo: `python3 tools/manual/build.py`.
+
 ## ¿Qué es?
 
 Una app que escucha tu espacio durante menos de un minuto (un momento de silencio y un aplauso) y te dice, en palabras sencillas:
