@@ -6,6 +6,8 @@
 
 > Las capturas usan datos de ejemplo.
 
+**Idiomas / Languages:** viene en **inglés**; el botón **ES** de arriba a la derecha la pasa a **español** (y **EN** la regresa). *It comes in English; the ES button at the top right switches it to Spanish.*
+
 ## Pruébala ahora
 
 - **En el navegador (iPhone, Android y computadora):** https://drophlex.github.io/polaris-acustica/
@@ -182,6 +184,9 @@ Cada micrófono se calibra por separado y la calibración vale mientras no cambi
 Todo el análisis ocurre en tu dispositivo. El audio **no se envía a ningún servidor**. La página solo descarga las tipografías desde Google Fonts.
 
 ## ¿Quieres modificarla o proponer cambios?
+
+**Textos en dos idiomas:** la app está escrita en español y cada texto tiene su traducción al inglés en el objeto `I18N` (y `I18N_STATIC` para el HTML fijo) al principio del script de `index.html`. Si agregas o cambias un texto, agrega también su traducción ahí.
+
 
 El código se publica para que lo puedas consultar, pero **solo el responsable puede modificarlo** (ver [LICENSE](LICENSE)). Si tienes una idea o quieres colaborar, [abre una propuesta](../../issues/new/choose) o escríbeme. Si me convence, te doy acceso para que trabajes en el código. Detalles en [CONTRIBUTING.md](CONTRIBUTING.md).
 
